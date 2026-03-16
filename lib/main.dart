@@ -1,121 +1,323 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const EcoSensingApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class EcoSensingApp extends StatelessWidget {
+  const EcoSensingApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+      title: 'Eco-Sensing 碳排AI智慧核算助理',
+      theme: ThemeData( // colorScheme: 主題色彩 useMaterail3: 並啟用設計風格
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const LoginPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class LoginPage extends StatefulWidget {  // 登入頁面，使用 StatefulWidget 以便管理輸入狀態
+  const LoginPage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String? _selectedRole;
+  bool _obscurePassword = true;
 
   @override
+  void dispose() {  // 釋放控制器資源，避免記憶體外洩
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _handleLogin() {  // 處理登入邏輯
+    if (_emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _selectedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('請填寫所有欄位')),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar( // 顯示登入成功訊息，實際應用中應該進行驗證
+      SnackBar(content: Text('以 $_selectedRole 身份登入：${_emailController.text}')),
+    );
+  }
+
+ @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      body: Container(
+        // 漸層背景
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors:[
+              Colors.green.shade50,
+              Colors.blue.shade50,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          // Center 讓裡面的東西在整個螢幕中「垂直且水平置中」
+          child: Center(
+            child: SingleChildScrollView(
+              // 外層加一點 Padding，避免在小手機上卡片緊貼螢幕邊緣
+              padding: const EdgeInsets.all(24.0), 
+              // ConstrainedBox 是網頁/桌面版的救星！限制卡片最寬只能是 400
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                // 使用 Card 或帶有陰影的 Container 來製作「浮動卡片」
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white, // 卡片背景色
+                    borderRadius: BorderRadius.circular(24), // 卡片圓角
+                    boxShadow:[
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1), // 淡淡的陰影
+                        blurRadius: 20,
+                        offset: const Offset(0, 10), // 陰影往下偏移，更有浮空感
+                      ),
+                    ],
+                  ),
+                  // 卡片內部的 Padding
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    // 5. 重要！讓 Column 的高度「剛好包住內容就好」，不要撐滿整個螢幕
+                    mainAxisSize: MainAxisSize.min, 
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children:[
+                      // --- 下面的內容幾乎和你原本的一樣，只是拿掉了一些太大的空白(SizedBox) ---
+                      
+                      // 標題區塊
+                      Center(
+                        child: Column(
+                          children:[
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.green.shade100,
+                              ),
+                              child: Icon(
+                                Icons.eco,
+                                size: 48,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Eco-Sensing',
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green.shade800,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '企業範疇三碳排AI智慧核算助理',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.grey.shade600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 32), // 縮小原本的間距
+                      
+                      // 角色選擇
+                      Text(
+                        '選擇身份',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children:[
+                          Expanded(
+                            child: _buildRoleButton(
+                              role: '企業端',
+                              icon: Icons.business,
+                              isSelected: _selectedRole == '企業端',
+                              onTap: () => setState(() => _selectedRole = '企業端'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildRoleButton(
+                              role: '員工端',
+                              icon: Icons.person,
+                              isSelected: _selectedRole == '員工端',
+                              onTap: () => setState(() => _selectedRole = '員工端'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // 郵箱欄位
+                      Text(
+                        '郵箱地址',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          hintText: '請輸入郵箱',
+                          prefixIcon: const Icon(Icons.email),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.green.shade600, width: 2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // 密碼欄位
+                      Text(
+                        '密碼',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          hintText: '請輸入密碼',
+                          prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          ),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.green.shade600, width: 2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      
+                      // 登入按鈕
+                      ElevatedButton(
+                        onPressed: _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green.shade600,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          '登入',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      
+                      // 忘記密碼
+                      TextButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('忘記密碼功能待實現')),
+                          );
+                        },
+                        child: Text('忘記密碼？', style: TextStyle(color: Colors.green.shade600)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+    );
+  }
+
+  Widget _buildRoleButton({ // 角色選擇按鈕 (模組化)
+    required String role,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: [Colors.green.shade400, Colors.green.shade600],
+                )
+              : LinearGradient(
+                  colors: [Colors.grey.shade100, Colors.grey.shade200],
+                ),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.green.shade700 : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.green.shade300,
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('You have pushed the button this many times:'),
+            Icon(
+              icon,
+              size: 32,
+              color: isSelected ? Colors.white : Colors.grey.shade700,
+            ),
+            const SizedBox(height: 8),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              role,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? Colors.white : Colors.grey.shade700,
+              ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
