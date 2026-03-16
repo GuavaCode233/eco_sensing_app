@@ -11,10 +11,17 @@ class EcoSensingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Eco-Sensing 碳排AI智慧核算助理',
+      // 淺色主題
       theme: ThemeData( // colorScheme: 主題色彩 useMaterail3: 並啟用設計風格
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF5B8FF9)),
         useMaterial3: true,
       ),
+      // 深色主題
+      darkTheme: ThemeData( 
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF5B8FF9), brightness: Brightness.dark),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.light, // 跟隨系統主題
       home: const LoginPage(),
     );
   }
@@ -61,14 +68,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         // 漸層背景
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors:[
-              Colors.green.shade50,
-              Colors.blue.shade50,
-            ],
-          ),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         ),
         child: SafeArea(
           // Center 讓裡面的東西在整個螢幕中「垂直且水平置中」
@@ -82,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                 // 使用 Card 或帶有陰影的 Container 來製作「浮動卡片」
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white, // 卡片背景色
+                    color: Theme.of(context).colorScheme.surface, // 卡片背景色
                     borderRadius: BorderRadius.circular(24), // 卡片圓角
                     boxShadow:[
                       BoxShadow(
@@ -109,12 +109,12 @@ class _LoginPageState extends State<LoginPage> {
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.green.shade100,
+                                color: Colors.blue.shade100,
                               ),
                               child: Icon(
                                 Icons.eco,
                                 size: 48,
-                                color: Colors.green.shade700,
+                                color: Colors.blue.shade700,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -122,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                               'Eco-Sensing',
                               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade800,
+                                    color: Theme.of(context).colorScheme.primary,
                                   ),
                             ),
                             const SizedBox(height: 8),
@@ -151,7 +151,6 @@ class _LoginPageState extends State<LoginPage> {
                           Expanded(
                             child: _buildRoleButton(
                               role: '企業端',
-                              icon: Icons.business,
                               isSelected: _selectedRole == '企業端',
                               onTap: () => setState(() => _selectedRole = '企業端'),
                             ),
@@ -160,7 +159,6 @@ class _LoginPageState extends State<LoginPage> {
                           Expanded(
                             child: _buildRoleButton(
                               role: '員工端',
-                              icon: Icons.person,
                               isSelected: _selectedRole == '員工端',
                               onTap: () => setState(() => _selectedRole = '員工端'),
                             ),
@@ -190,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.green.shade600, width: 2),
+                            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                           ),
                         ),
                       ),
@@ -221,7 +219,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.green.shade600, width: 2),
+                            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                           ),
                         ),
                       ),
@@ -231,7 +229,7 @@ class _LoginPageState extends State<LoginPage> {
                       ElevatedButton(
                         onPressed: _handleLogin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade600,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -253,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
                             const SnackBar(content: Text('忘記密碼功能待實現')),
                           );
                         },
-                        child: Text('忘記密碼？', style: TextStyle(color: Colors.green.shade600)),
+                        child: Text('忘記密碼？', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                       ),
                     ],
                   ),
@@ -268,31 +266,24 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildRoleButton({ // 角色選擇按鈕 (模組化)
     required String role,
-    required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          gradient: isSelected
-              ? LinearGradient(
-                  colors: [Colors.green.shade400, Colors.green.shade600],
-                )
-              : LinearGradient(
-                  colors: [Colors.grey.shade100, Colors.grey.shade200],
-                ),
+          color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.green.shade700 : Colors.grey.shade300,
+            color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.green.shade300,
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -302,12 +293,6 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 32,
-              color: isSelected ? Colors.white : Colors.grey.shade700,
-            ),
-            const SizedBox(height: 8),
             Text(
               role,
               style: TextStyle(
