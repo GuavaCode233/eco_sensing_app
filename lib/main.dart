@@ -150,17 +150,17 @@ class _LoginPageState extends State<LoginPage> {
                         children:[
                           Expanded(
                             child: _buildRoleButton(
-                              role: '企業端',
-                              isSelected: _selectedRole == '企業端',
-                              onTap: () => setState(() => _selectedRole = '企業端'),
+                              role: '員工端',
+                              isSelected: _selectedRole == '員工端',
+                              onTap: () => setState(() => _selectedRole = '員工端'),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _buildRoleButton(
-                              role: '員工端',
-                              isSelected: _selectedRole == '員工端',
-                              onTap: () => setState(() => _selectedRole = '員工端'),
+                              role: '企業端',
+                              isSelected: _selectedRole == '企業端',
+                              onTap: () => setState(() => _selectedRole = '企業端'),
                             ),
                           ),
                         ],
@@ -272,13 +272,13 @@ class _LoginPageState extends State<LoginPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
+            width: 1.5,
           ),
           boxShadow: isSelected
               ? [
