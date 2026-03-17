@@ -335,9 +335,9 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
 
   final List<Widget> _pages = [
     const DashboardPage(),  // 索引 0: 主畫面，儀表板
-    const Center(child: Text('i減碳頁面 開發中...', style: TextStyle(fontSize: 24))), // 索引 1: i減碳，減碳活動/任務推薦頁面
-    const Center(child: Text('排行榜頁面 開發中...', style: TextStyle(fontSize: 24))), // 索引 2: 部門內排行榜
-    const Center(child: Text('個人頁面 開發中...', style: TextStyle(fontSize: 24))), // 索引 3: 個人頁面，資料維護、系統設定
+    const IReduceCarbonPage(), // 索引 1: i減碳，減碳活動/任務推薦頁面
+    const LeaderboardPage(), // 索引 2: 部門內排行榜
+    const ProfilePage(), // 索引 3: 個人頁面，資料維護、系統設定
   ];
   
   void _onItemTapped(int index) {
@@ -770,6 +770,73 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// 索引 1: i減碳，減碳活動/任務推薦頁面 (待開發)
+class IReduceCarbonPage extends StatefulWidget {
+  const IReduceCarbonPage({super.key});
+
+  @override
+  State<IReduceCarbonPage> createState() => _IReduceCarbonPageState();
+}
+
+class _IReduceCarbonPageState extends State<IReduceCarbonPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          'i減碳頁面 開發中...',
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      ),
+    );
+  }
+}
+
+ // 索引 2: 部門內排行榜 (待開發)
+ class LeaderboardPage extends StatefulWidget {
+  const LeaderboardPage({super.key});
+
+  @override
+  State<LeaderboardPage> createState() => _LeaderboardPageState();
+}
+
+
+class _LeaderboardPageState extends State<LeaderboardPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          '排行榜頁面 開發中...',
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      ),
+    );
+  }
+}
+
+// 索引 3: 個人頁面，資料維護、系統設定 (待開發)
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          '個人頁面 開發中...',
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
       ),
     );
   }
