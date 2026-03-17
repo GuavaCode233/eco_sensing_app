@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 void main() {
   runApp(const EcoSensingApp());
@@ -57,9 +58,20 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar( // 顯示登入成功訊息，實際應用中應該進行驗證
-      SnackBar(content: Text('以 $_selectedRole 身份登入：${_emailController.text}')),
-    );
+    // 根據選擇的身份進行導航
+    if (_selectedRole == '員工端') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => EmployeeHomePage(
+            email: _emailController.text,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('企業端功能待開發')),
+      );
+    }
   }
 
  @override
@@ -303,6 +315,390 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// 員工首頁
+class EmployeeHomePage extends StatefulWidget {
+  final String email;
+
+  const EmployeeHomePage({
+    super.key,
+    required this.email,
+  });
+
+  @override
+  State<EmployeeHomePage> createState() => _EmployeeHomePageState();
+}
+
+class _EmployeeHomePageState extends State<EmployeeHomePage> {
+  // 模擬用戶數據
+  late String userName;
+  late String level;
+  late int tokens;
+
+  @override
+  void initState() {
+    super.initState();
+    // 根據郵箱提取用戶名
+    userName = widget.email.split('@')[0];
+    level = '青銅';
+    tokens = 1250;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 用戶信息區塊
+                  _buildUserInfoCard(),
+                  const SizedBox(height: 32),
+
+                  // 碳排數據卡片
+                  _buildCarbonEmissionCard(),
+                  const SizedBox(height: 24),
+
+                  // 退出登入按鈕
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        '登出',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 用戶信息卡片
+  Widget _buildUserInfoCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 用戶名
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                ),
+                child: Icon(
+                  Icons.person,
+                  size: 28,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '歡迎，$userName',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    widget.email,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // 等級和代幣信息
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoTile(
+                  icon: Icons.star,
+                  label: '目前等級',
+                  value: level,
+                  backgroundColor: Colors.amber,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoTile(
+                  icon: Icons.monetization_on,
+                  label: '碳幣',
+                  value: '$tokens',
+                  backgroundColor: Colors.green,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 信息磚塊
+  Widget _buildInfoTile({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color backgroundColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: backgroundColor.withValues(alpha: 0.3)),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          Icon(icon, color: backgroundColor, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: backgroundColor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 碳排數據卡片（圓餅圖）
+  Widget _buildCarbonEmissionCard() {
+    // 模擬月度碳排數據 (單位：公斤)
+    final double travelEmission = 45.5;
+    final double wasteEmission = 12.3;
+    final double totalEmission = travelEmission + wasteEmission;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '月度碳排組成',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // 圓餅圖
+          Center(
+            child: SizedBox(
+              height: 220,
+              child: PieChart(
+                PieChartData(
+                  sections: [
+                    PieChartSectionData(
+                      color: Colors.blue.shade400,
+                      value: travelEmission,
+                      title: '${(travelEmission / totalEmission * 100).toStringAsFixed(1)}%',
+                      radius: 80,
+                      titleStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    PieChartSectionData(
+                      color: Colors.green.shade400,
+                      value: wasteEmission,
+                      title: '${(wasteEmission / totalEmission * 100).toStringAsFixed(1)}%',
+                      radius: 80,
+                      titleStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                  centerSpaceRadius: 0,
+                  sectionsSpace: 3,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // 圖例和數據
+          Row(
+            children: [
+              Expanded(
+                child: _buildEmissionLegend(
+                  label: '差旅',
+                  value: '${travelEmission.toStringAsFixed(1)} kg',
+                  color: Colors.blue.shade400,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildEmissionLegend(
+                  label: '廢棄物',
+                  value: '${wasteEmission.toStringAsFixed(1)} kg',
+                  color: Colors.green.shade400,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 總計
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '本月總碳排量',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${totalEmission.toStringAsFixed(1)} kg',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 碳排圖例
+  Widget _buildEmissionLegend({
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
