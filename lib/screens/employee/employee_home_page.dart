@@ -1,3 +1,4 @@
+import 'package:eco_sensing_app/screens/employee/scan_page.dart';
 import 'package:flutter/material.dart';
 
 import 'dashboard_page.dart';
@@ -23,8 +24,9 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   final List<Widget> _pages = [
     const DashboardPage(),  // 索引 0: 主畫面，儀表板
     const IReduceCarbonPage(), // 索引 1: i減碳，減碳活動/任務推薦頁面
-    const LeaderboardPage(), // 索引 2: 部門內排行榜
-    const ProfilePage(), // 索引 3: 個人頁面，資料維護、系統設定
+    const ScanPage(), // 索引 2: 掃描頁面
+    const LeaderboardPage(), // 索引 3: 部門內排行榜
+    const ProfilePage(), // 索引 4: 個人頁面，資料維護、系統設定
   ];
   
   void _onItemTapped(int index) {
@@ -52,7 +54,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
         selectedItemColor: Colors.blueAccent, // 選中時的顏色 (藍色)
         unselectedItemColor: Colors.grey.shade400, // 未選中時的顏色 (灰色)
         
-        // 這裡放你的四個按鈕
+        // 這裡放你的五個按鈕
         items: const[
           BottomNavigationBarItem(
             icon: Icon(Icons.pie_chart_outline), // 儀表板圖示
@@ -63,6 +65,11 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             icon: Icon(Icons.eco_outlined), 
             activeIcon: Icon(Icons.eco), 
             label: 'i減碳',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_scanner_rounded), 
+            activeIcon: Icon(Icons.qr_code_scanner_rounded), 
+            label: '掃描',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.leaderboard_outlined), 
