@@ -66,5 +66,14 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- 相機權限 -->
+	<key>NSCameraUsageDescription</key>
+	<string>應用需要存取您的相機以進行單據拍照</string>
+	<!-- 照片庫權限 -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>應用需要存取您的照片以上傳單據</string>
+	<!-- iOS 14+ 照片選取器權限 -->
+	<key>NSPhotoLibraryAddOnlyUsageDescription</key>
+	<string>應用需要將照片保存到您的相簿</string>
 </dict>
 </plist>

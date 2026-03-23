@@ -1,4 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 相機權限 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- 讀取存儲權限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Android 13+ 上圖片和視頻權限 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    
     <application
         android:label="eco_sensing_app"
         android:name="${applicationName}"
