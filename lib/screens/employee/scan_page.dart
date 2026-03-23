@@ -133,6 +133,9 @@ class _ScanPageState extends State<ScanPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
+              width: 250,
+              height: 250,
+              alignment: Alignment.center,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
