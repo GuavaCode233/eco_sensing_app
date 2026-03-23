@@ -22,7 +22,7 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     // 這裡未來可以換成呼叫後端 API 的程式碼，例如 fetchUserData()
     userName = "王小明";
-    level = '青銅';
+    level = '7';
     tokens = 1250;
   }
 
@@ -116,63 +116,58 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           // 用戶名、等級和碳幣信息
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surface,
-                ),
-                child: Icon(
-                  Icons.person,
-                  size: 28,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Text(
-                    '歡迎，$userName',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                    child: Icon(
+                      Icons.person,
+                      size: 28,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  // 這裡可以顯示郵箱或其他用戶信息，目前先註解掉
-                  // Text(
-                  //   widget.email,
-                  //   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  //     color: Colors.grey.shade600,
-                  //   ),
-                  // ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '歡迎，$userName',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // 等級和代幣信息
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoTile(
-                  icon: Icons.star,
-                  label: '目前等級',
-                  value: level,
-                  backgroundColor: Colors.amber,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildInfoTile(
-                  icon: Icons.monetization_on,
-                  label: '碳幣',
-                  value: '$tokens',
-                  backgroundColor: Colors.green,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    child: _buildInfoTile(
+                      icon: Icons.star,
+                      label: 'Lv.',
+                      value: level,
+                      backgroundColor: Colors.amber,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    child: _buildInfoTile(
+                      icon: Icons.eco_outlined,
+                      label: '碳幣',
+                      value: '$tokens',
+                      backgroundColor: Colors.green,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -191,11 +186,11 @@ class _DashboardPageState extends State<DashboardPage> {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: backgroundColor.withValues(alpha: 0.3)),
       ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Row(
         children: [
           Icon(icon, color: backgroundColor, size: 24),
           const SizedBox(height: 8),
