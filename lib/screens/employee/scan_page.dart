@@ -11,8 +11,7 @@ class ScanPage extends StatefulWidget {
   State<ScanPage> createState() => _ScanPageState();
 }
 
-class _ScanPageState extends State<ScanPage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _ScanPageState extends State<ScanPage> {
   File? _selectedImage;
   final ImagePicker _imagePicker = ImagePicker();
   final String _employeeQRCode = const Uuid().v4(); // 員工專屬QR Code
@@ -20,12 +19,10 @@ class _ScanPageState extends State<ScanPage> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -101,9 +98,9 @@ class _ScanPageState extends State<ScanPage> with SingleTickerProviderStateMixin
 
   void _uploadImage() {
     // TODO: 實現上傳邏輯至服務器
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('照片已上傳')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('照片已上傳')));
     setState(() {
       _selectedImage = null;
     });
@@ -125,178 +122,158 @@ class _ScanPageState extends State<ScanPage> with SingleTickerProviderStateMixin
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('掃描單據'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: '拍照'),
-            Tab(text: '選擇照片'),
-            Tab(text: '我的QR Code'),
+  void _showQRCodePopup() {
+    // 顯示員工專屬QR Code的彈窗
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('我的QR Code'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                ),
+              ),
+              child: QrImageView(
+                data: _employeeQRCode,
+                version: QrVersions.auto,
+                size: 200,
+                embeddedImage: null,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '員工ID: ${_employeeQRCode.substring(0, 8).toUpperCase()}',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '掃碼器請掃描此QR Code進行識別',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // 拍照標籤
-          _buildCameraTab(),
-          // 選擇照片標籤
-          _buildGalleryTab(),
-          // QR Code標籤
-          _buildQRCodeTab(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCameraTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.camera_alt,
-            size: 64,
-            color: Theme.of(context).primaryColor,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            '拍照上傳紙本單據',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: _takePhoto,
-            icon: const Icon(Icons.camera),
-            label: const Text('開啟相機'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 16,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-            ),
-          ),
-          if (_selectedImage != null) ...[
-            const SizedBox(height: 24),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                _selectedImage!,
-                height: 300,
-                width: 300,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGalleryTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.image,
-            size: 64,
-            color: Theme.of(context).primaryColor,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            '從相簿選擇照片',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: _pickImageFromGallery,
-            icon: const Icon(Icons.photo_library),
-            label: const Text('選擇照片'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 16,
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-            ),
-          ),
-          if (_selectedImage != null) ...[
-            const SizedBox(height: 24),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                _selectedImage!,
-                height: 300,
-                width: 300,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQRCodeTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            '我的QR Code',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 32),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: QrImageView(
-              data: _employeeQRCode,
-              version: QrVersions.auto,
-              size: 250,
-              embeddedImage: null,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            '員工ID: ${_employeeQRCode.substring(0, 8).toUpperCase()}',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '掃碼器請掃描此QR Code進行識別',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 32),
+        actions: [
           ElevatedButton.icon(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('QR Code已複製到剪貼簿')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('QR Code已複製到剪貼簿')));
             },
             icon: const Icon(Icons.copy),
             label: const Text('複製ID'),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('關閉'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('掃描單據')),
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.camera_alt,
+                    size: 64,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    '拍照上傳紙本單據',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    onPressed: _takePhoto,
+                    icon: const Icon(Icons.camera),
+                    label: const Text('開啟相機'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  if (_selectedImage != null) ...[
+                    const SizedBox(height: 24),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        _selectedImage!,
+                        height: 300,
+                        width: 300,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          // 功能按鈕行
+          Container(
+            padding: const EdgeInsets.all(12),
+            color: Colors.grey[100],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _pickImageFromGallery,
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('選擇照片'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _takePhoto,
+                  icon: const Icon(Icons.camera),
+                  label: const Text('拍照'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _showQRCodePopup,
+                  icon: const Icon(Icons.qr_code),
+                  label: const Text('我的QR Code'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 拍照頁面內容
         ],
       ),
     );
