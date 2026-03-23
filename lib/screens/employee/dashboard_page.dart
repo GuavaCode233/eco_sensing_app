@@ -12,7 +12,6 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-
   // 模擬用戶數據
   late String userName;
   late String level;
@@ -30,62 +29,68 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 用戶信息區塊
-                  _buildUserInfoCard(),
-                  const SizedBox(height: 32),
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            // 頁面頂部的背景色塊
+            Container(
+              height: 240 + MediaQuery.of(context).padding.top,
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.1),
+              ),
+            ),
+            // 頁面內容
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 用戶信息區塊
+                    _buildUserInfoCard(),
+                    const SizedBox(height: 32),
 
-                  // 碳排數據卡片
-                  _buildCarbonEmissionCard(),
-                  const SizedBox(height: 24),
+                    // 碳排數據卡片
+                    _buildCarbonEmissionCard(),
+                    const SizedBox(height: 24),
 
-                  // 退出登入按鈕
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        // 這裡可以加入登出邏輯，例如清除用戶資料、Token 等
-
-                        // 登出後導航回登入頁面
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
+                    // 退出登入按鈕
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
+                            (Route<dynamic> route) => false,
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
                           ),
-                          (Route<dynamic> route) => false, // 清除所有先前的路由，防止用戶按返回鍵回到主頁
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: BorderSide( 
-                          color: Theme.of(context).colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        '登出',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
+                        child: Text(
+                          '登出',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -94,29 +99,31 @@ class _DashboardPageState extends State<DashboardPage> {
   // 用戶信息卡片
   Widget _buildUserInfoCard() {
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      // decoration: BoxDecoration(
+      //   color: Theme.of(context).colorScheme.surface,
+      //   borderRadius: BorderRadius.circular(20),
+      //   boxShadow: [
+      //     BoxShadow(
+      //       color: Colors.black.withValues(alpha: 0.1),
+      //       blurRadius: 20,
+      //       offset: const Offset(0, 10),
+      //     ),
+      //   ],
+      // ),
       padding: const EdgeInsets.all(24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 用戶名
+          // 用戶名、等級和碳幣信息
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surface,
                 ),
                 child: Icon(
                   Icons.person,
@@ -194,9 +201,9 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(height: 8),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey.shade600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
@@ -238,9 +245,9 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           Text(
             '月度碳排組成',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
 
@@ -254,7 +261,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     PieChartSectionData(
                       color: Colors.blue.shade400,
                       value: travelEmission,
-                      title: '${(travelEmission / totalEmission * 100).toStringAsFixed(1)}%',
+                      title:
+                          '${(travelEmission / totalEmission * 100).toStringAsFixed(1)}%',
                       radius: 80,
                       titleStyle: const TextStyle(
                         fontSize: 14,
@@ -265,7 +273,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     PieChartSectionData(
                       color: Colors.green.shade400,
                       value: wasteEmission,
-                      title: '${(wasteEmission / totalEmission * 100).toStringAsFixed(1)}%',
+                      title:
+                          '${(wasteEmission / totalEmission * 100).toStringAsFixed(1)}%',
                       radius: 80,
                       titleStyle: const TextStyle(
                         fontSize: 14,
@@ -307,10 +316,14 @@ class _DashboardPageState extends State<DashboardPage> {
           // 總計
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.3),
               ),
             ),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -319,9 +332,9 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 Text(
                   '本月總碳排量',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   '${totalEmission.toStringAsFixed(1)} kg',
@@ -358,18 +371,15 @@ class _DashboardPageState extends State<DashboardPage> {
               Container(
                 width: 12,
                 height: 12,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color,
-                ),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: color),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
             ],
