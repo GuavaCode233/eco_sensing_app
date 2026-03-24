@@ -22,25 +22,54 @@ class EcoSensingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      locale: DevicePreview.locale(context), // 使用 DevicePreview 的語言設定
-      builder: DevicePreview.appBuilder, // 使用 DevicePreview 的 appBuilder
-
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
       title: 'Eco-Sensing 碳排AI智慧核算助理',
-      // 淺色主題
+      // 淺色主題 - TanAI 設計系統
       theme: ThemeData(
-        // colorScheme: 主題色彩 useMaterail3: 並啟用設計風格
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF5B8FF9)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF5B8FF9), // 主藍色
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
+        // 卡片配置
+        cardTheme: CardThemeData(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          color: const Color(0xFFFAFAFC),
+        ),
+        // 輸入字段配置
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFFAFAFC),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFFEEF0F4)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFFEEF0F4)),
+          ),
+        ),
+        // 浮動操作按鈕
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: const Color(0xFF5B8FF9),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
       ),
       // 深色主題
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Color(0xFF5B8FF9),
+          seedColor: const Color(0xFF5B8FF9),
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.system, // 跟隨系統主題
+      themeMode: ThemeMode.system,
       home: const LoginPage(),
     );
   }

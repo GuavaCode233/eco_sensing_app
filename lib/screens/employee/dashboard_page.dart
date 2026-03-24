@@ -32,19 +32,24 @@ class _DashboardPageState extends State<DashboardPage> {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            // 頁面頂部的背景色塊
+            // 頂部漸變背景
             Container(
               height: 240 + MediaQuery.of(context).padding.top,
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.1),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF5B8FF9), Color(0xFF4A7FD9)],
+                ),
               ),
             ),
             // 頁面內容
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 24,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -56,7 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     _buildCarbonEmissionCard(),
                     const SizedBox(height: 24),
 
-                    // 退出登入按鈕
+                    // 登出按鈕
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
@@ -70,17 +75,18 @@ class _DashboardPageState extends State<DashboardPage> {
                         },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.primary,
+                          side: const BorderSide(
+                            color: Color(0xFF5B8FF9),
+                            width: 1,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           '登出',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: Color(0xFF5B8FF9),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -138,16 +144,15 @@ class _DashboardPageState extends State<DashboardPage> {
                     children: [
                       Text(
                         '歡迎,',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         userName,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ],
@@ -231,12 +236,12 @@ class _DashboardPageState extends State<DashboardPage> {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
           ),
         ],
       ),

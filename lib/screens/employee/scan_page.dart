@@ -142,11 +142,8 @@ class _ScanPageState extends State<ScanPage> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Theme.of(context).primaryColor,
-                  width: 2,
-                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFF5B8FF9), width: 2),
               ),
               child: QrImageView(
                 data: _employeeQRCode,
@@ -194,7 +191,11 @@ class _ScanPageState extends State<ScanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('掃描單據')),
+      appBar: AppBar(
+        title: const Text('掃描單據'),
+        backgroundColor: const Color(0xFF5B8FF9),
+        elevation: 0,
+      ),
       body: Column(
         children: [
           Expanded(
@@ -205,7 +206,7 @@ class _ScanPageState extends State<ScanPage> {
                   Icon(
                     Icons.camera_alt,
                     size: 64,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -222,14 +223,17 @@ class _ScanPageState extends State<ScanPage> {
                         horizontal: 32,
                         vertical: 16,
                       ),
-                      backgroundColor: Theme.of(context).primaryColor,
+                      backgroundColor: const Color(0xFF5B8FF9),
                       foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                   if (_selectedImage != null) ...[
                     const SizedBox(height: 24),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(14),
                       child: Image.file(
                         _selectedImage!,
                         height: 300,
@@ -242,10 +246,10 @@ class _ScanPageState extends State<ScanPage> {
               ),
             ),
           ),
-          // 功能按鈕行
+          // 功能按鈕行 - TanAI 設計風格
           Container(
-            padding: const EdgeInsets.all(12),
-            color: Colors.grey[100],
+            padding: const EdgeInsets.all(16),
+            color: const Color(0xFFFAFAFC),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -254,8 +258,11 @@ class _ScanPageState extends State<ScanPage> {
                   icon: const Icon(Icons.photo_library),
                   label: const Text('選擇照片'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: const Color(0xFF5B8FF9),
                     foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                 ),
                 ElevatedButton.icon(
@@ -263,14 +270,16 @@ class _ScanPageState extends State<ScanPage> {
                   icon: const Icon(Icons.qr_code),
                   label: const Text('我的QR Code'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: const Color(0xFF5B8FF9),
                     foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          // 拍照頁面內容
         ],
       ),
     );
