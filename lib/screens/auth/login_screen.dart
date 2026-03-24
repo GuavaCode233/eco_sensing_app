@@ -67,10 +67,10 @@ class _LoginPageState extends State<LoginPage> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface, // 卡片背景色
-                    borderRadius: BorderRadius.circular(24), // 卡片圓角
+                    borderRadius: BorderRadius.circular(14), // 卡片圓角
                     boxShadow:[
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1), // 淡淡的陰影
+                        color: Colors.black.withValues(alpha: 0.06), // 淡淡的陰影
                         blurRadius: 20,
                         offset: const Offset(0, 10), // 陰影往下偏移，更有浮空感
                       ),
@@ -106,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                               'Eco-Sensing',
                               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: const Color(0xFF5B8FF9),
                                   ),
                             ),
                             const SizedBox(height: 8),
@@ -172,7 +172,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                            borderSide: BorderSide(color: const Color(0xFF5B8FF9), width: 2),
                           ),
                         ),
                       ),
@@ -203,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                            borderSide: BorderSide(color: const Color(0xFF5B8FF9), width: 2),
                           ),
                         ),
                       ),
@@ -213,7 +213,7 @@ class _LoginPageState extends State<LoginPage> {
                       ElevatedButton(
                         onPressed: _handleLogin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          backgroundColor: const Color(0xFF5B8FF9),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -235,7 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                             const SnackBar(content: Text('忘記密碼功能待實現')),
                           );
                         },
-                        child: Text('忘記密碼？', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                        child: Text('忘記密碼？', style: TextStyle(color: const Color(0xFF5B8FF9))),
                       ),
                     ],
                   ),
@@ -258,16 +258,16 @@ class _LoginPageState extends State<LoginPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade200,
+          color: isSelected ? const Color(0xFF5B8FF9) : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
+            color: isSelected ? const Color(0xFF5B8FF9) : Colors.grey.shade300,
             width: 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                    color: const Color(0xFF5B8FF9).withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),

@@ -34,7 +34,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             // 頂部漸變背景
             Container(
-              height: 240 + MediaQuery.of(context).padding.top,
+              height: 200 + MediaQuery.of(context).padding.top,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,

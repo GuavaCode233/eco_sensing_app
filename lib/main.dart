@@ -25,7 +25,7 @@ class EcoSensingApp extends StatelessWidget {
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
       title: 'Eco-Sensing 碳排AI智慧核算助理',
-      // 淺色主題 - TanAI 設計系統
+      // 淺色主題
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF5B8FF9), // 主藍色

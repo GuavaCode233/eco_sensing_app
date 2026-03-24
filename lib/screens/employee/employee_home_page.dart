@@ -41,7 +41,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
       // 底部導覽列 - TanAI 設計風格
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color(0xFFFAFAFC), // TanAI 背景色
+        backgroundColor: const Color(0xFFFAFAFC),
         elevation: 2,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
