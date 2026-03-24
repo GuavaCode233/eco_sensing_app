@@ -137,11 +137,17 @@ class _DashboardPageState extends State<DashboardPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '歡迎，$userName',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        '歡迎,',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      Text(
+                        userName,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
                     ],
                   ),
                 ],
@@ -189,7 +195,7 @@ class _DashboardPageState extends State<DashboardPage> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: backgroundColor.withValues(alpha: 0.3)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
         children: [
           Icon(icon, color: backgroundColor, size: 24),

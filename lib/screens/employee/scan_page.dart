@@ -27,6 +27,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> _takePhoto() async {
+    // 使用 image_picker 打開相機拍照
     try {
       final XFile? photo = await _imagePicker.pickImage(
         source: ImageSource.camera,
@@ -44,6 +45,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> _pickImageFromGallery() async {
+    // 從相簿選擇照片
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
@@ -61,6 +63,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _showUploadConfirmation() {
+    // 顯示確認上傳的對話框
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
