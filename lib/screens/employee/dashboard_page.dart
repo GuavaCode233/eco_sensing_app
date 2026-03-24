@@ -55,11 +55,13 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     // 用戶信息區塊
                     _buildUserInfoCard(),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 18),
 
+                    _buildExperienceBarCard(),
+                    const SizedBox(height: 18),
                     // 碳排數據卡片
                     _buildCarbonEmissionCard(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 18),
 
                     // 登出按鈕
                     SizedBox(
@@ -116,7 +118,7 @@ class _DashboardPageState extends State<DashboardPage> {
       //     ),
       //   ],
       // ),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -226,9 +228,68 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // 碳排數據卡片（圓餅圖）
+  Widget _buildExperienceBarCard() {
+    // 經驗值進度卡
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '⚡ 經驗值',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildExperienceBar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExperienceBar(){
+    // 經驗值進度條
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 8, 
+      decoration: BoxDecoration(
+        color: Colors.grey[400],
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: FractionallySizedBox(
+          alignment: Alignment.topLeft,
+          widthFactor: 0.7, // The progress value (e.g., 0.7 for 70%)
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: <Color>[
+                  Colors.blue,
+                  Color.fromARGB(255, 142, 221, 252),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
   Widget _buildCarbonEmissionCard() {
-    // 模擬月度碳排數據 (單位：公斤)
+    // 碳排數據卡片（圓餅圖）
     final double travelEmission = 45.5;
     final double wasteEmission = 12.3;
     final double totalEmission = travelEmission + wasteEmission;
@@ -245,7 +306,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -357,8 +418,8 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // 碳排圖例
   Widget _buildEmissionLegend({
+    // 碳排圖例
     required String label,
     required String value,
     required Color color,
