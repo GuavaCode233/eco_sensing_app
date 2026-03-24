@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../screens/employee/employee_home_page.dart';
 
-class LoginPage extends StatefulWidget {  // 登入頁面，使用 StatefulWidget 以便管理輸入狀態
+class LoginPage extends StatefulWidget {
+  // 登入頁面，使用 StatefulWidget 以便管理輸入狀態
   const LoginPage({super.key});
 
   @override
@@ -16,37 +17,37 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
 
   @override
-  void dispose() {  // 釋放控制器資源，避免記憶體外洩
+  void dispose() {
+    // 釋放控制器資源，避免記憶體外洩
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleLogin() {  // 處理登入邏輯
+  void _handleLogin() {
+    // 處理登入邏輯
     if (_emailController.text.isEmpty ||
         _passwordController.text.isEmpty ||
         _selectedRole == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('請填寫所有欄位')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('請填寫所有欄位')));
       return;
     }
 
     // 根據選擇的身份進行導航
     if (_selectedRole == '員工端') {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => EmployeeHomePage(),
-        ),
+        MaterialPageRoute(builder: (context) => EmployeeHomePage()),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('企業端功能待開發')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('企業端功能待開發')));
     }
   }
 
- @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -59,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Center(
             child: SingleChildScrollView(
               // 外層加一點 Padding，避免在小手機上卡片緊貼螢幕邊緣
-              padding: const EdgeInsets.all(24.0), 
+              padding: const EdgeInsets.all(24.0),
               // ConstrainedBox 是網頁/桌面版的救星！限制卡片最寬只能是 400
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 400),
@@ -68,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface, // 卡片背景色
                     borderRadius: BorderRadius.circular(14), // 卡片圓角
-                    boxShadow:[
+                    boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.06), // 淡淡的陰影
                         blurRadius: 20,
@@ -80,15 +81,15 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
                     // 5. 重要！讓 Column 的高度「剛好包住內容就好」，不要撐滿整個螢幕
-                    mainAxisSize: MainAxisSize.min, 
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children:[
+                    children: [
                       // --- 下面的內容幾乎和你原本的一樣，只是拿掉了一些太大的空白(SizedBox) ---
-                      
+
                       // 標題區塊
                       Center(
                         child: Column(
-                          children:[
+                          children: [
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
@@ -104,7 +105,8 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 16),
                             Text(
                               'Eco-Sensing',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: const Color(0xFF5B8FF9),
                                   ),
@@ -112,31 +114,30 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 8),
                             Text(
                               '企業範疇三碳排AI智慧核算助理',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey.shade600,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.grey.shade600),
                               textAlign: TextAlign.center,
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 32), // 縮小原本的間距
-                      
                       // 角色選擇
                       Text(
                         '選擇身份',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Row(
-                        children:[
+                        children: [
                           Expanded(
                             child: _buildRoleButton(
                               role: '員工端',
                               isSelected: _selectedRole == '員工端',
-                              onTap: () => setState(() => _selectedRole = '員工端'),
+                              onTap: () =>
+                                  setState(() => _selectedRole = '員工端'),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -144,19 +145,20 @@ class _LoginPageState extends State<LoginPage> {
                             child: _buildRoleButton(
                               role: '企業端',
                               isSelected: _selectedRole == '企業端',
-                              onTap: () => setState(() => _selectedRole = '企業端'),
+                              onTap: () =>
+                                  setState(() => _selectedRole = '企業端'),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // 郵箱欄位
                       Text(
                         '郵箱地址',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       TextField(
@@ -165,25 +167,30 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           hintText: '請輸入郵箱',
                           prefixIcon: const Icon(Icons.email),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey.shade300),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: const Color(0xFF5B8FF9), width: 2),
+                            borderSide: BorderSide(
+                              color: const Color(0xFF5B8FF9),
+                              width: 2,
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      
+
                       // 密碼欄位
                       Text(
                         '密碼',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       TextField(
@@ -193,22 +200,33 @@ class _LoginPageState extends State<LoginPage> {
                           hintText: '請輸入密碼',
                           prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
-                            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey.shade300),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: const Color(0xFF5B8FF9), width: 2),
+                            borderSide: BorderSide(
+                              color: const Color(0xFF5B8FF9),
+                              width: 2,
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 32),
-                      
+
                       // 登入按鈕
                       ElevatedButton(
                         onPressed: _handleLogin,
@@ -216,18 +234,21 @@ class _LoginPageState extends State<LoginPage> {
                           backgroundColor: const Color(0xFF5B8FF9),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: Text(
                           '登入',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
+
                       // 忘記密碼
                       TextButton(
                         onPressed: () {
@@ -235,7 +256,10 @@ class _LoginPageState extends State<LoginPage> {
                             const SnackBar(content: Text('忘記密碼功能待實現')),
                           );
                         },
-                        child: Text('忘記密碼？', style: TextStyle(color: const Color(0xFF5B8FF9))),
+                        child: Text(
+                          '忘記密碼？',
+                          style: TextStyle(color: const Color(0xFF5B8FF9)),
+                        ),
                       ),
                     ],
                   ),
@@ -248,7 +272,8 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildRoleButton({ // 角色選擇按鈕 (模組化)
+  Widget _buildRoleButton({
+    // 角色選擇按鈕 (模組化)
     required String role,
     required bool isSelected,
     required VoidCallback onTap,

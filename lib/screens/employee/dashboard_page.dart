@@ -1,33 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../screens/auth/login_screen.dart'; // 引入登入頁面，登出後會導航回這裡
+import '../../providers/current_user_provider.dart';
 
-// 主索引 0: 畫面，儀表板
-class DashboardPage extends StatefulWidget {
+class DashboardPage extends ConsumerWidget {
+  // 模擬用戶數據
   const DashboardPage({super.key});
 
   @override
-  State<DashboardPage> createState() => _DashboardPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userProfile = ref.watch(currentUserProvider);
 
-class _DashboardPageState extends State<DashboardPage> {
-  // 模擬用戶數據
-  late String userName;
-  late String level;
-  late int tokens;
-
-  @override
-  void initState() {
-    super.initState();
-    // 這裡未來可以換成呼叫後端 API 的程式碼，例如 fetchUserData()
-    userName = "王小明";
-    level = '7';
-    tokens = 1250;
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: Stack(
@@ -105,7 +90,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   // 用戶信息卡片
-  Widget _buildUserInfoCard() {
+  Widget _buildUserInfoCard(BuildContext context) {
     return Container(
       // decoration: BoxDecoration(
       //   color: Theme.of(context).colorScheme.surface,
@@ -167,8 +152,9 @@ class _DashboardPageState extends State<DashboardPage> {
                     child: _buildInfoTile(
                       icon: Icons.star,
                       label: 'Lv.',
-                      value: level,
+                      value: userProfile.level,
                       backgroundColor: Colors.amber,
+                      context: context,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -178,6 +164,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       label: '碳幣',
                       value: '$tokens',
                       backgroundColor: Colors.green,
+                      context: context,
                     ),
                   ),
                 ],
@@ -195,6 +182,7 @@ class _DashboardPageState extends State<DashboardPage> {
     required String label,
     required String value,
     required Color backgroundColor,
+    required BuildContext context,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -209,9 +197,10 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(height: 8),
           Text(
             label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
@@ -228,7 +217,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildExperienceBarCard() {
+  Widget _buildExperienceBarCard(BuildContext context) {
     // 經驗值進度卡
     return Container(
       decoration: BoxDecoration(
@@ -246,24 +235,35 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '⚡ 經驗值',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '⚡ 經驗值',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
-          _buildExperienceBar(),
+          _buildExperienceBar(context),
         ],
       ),
     );
   }
 
-  Widget _buildExperienceBar(){
+  Widget _buildExperienceBar(BuildContext context) {
     // 經驗值進度條
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 8, 
+      height: 8,
       decoration: BoxDecoration(
         color: Colors.grey[400],
         borderRadius: BorderRadius.circular(4),
@@ -287,8 +287,8 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-  
-  Widget _buildCarbonEmissionCard() {
+
+  Widget _buildCarbonEmissionCard(BuildContext context) {
     // 碳排數據卡片（圓餅圖）
     final double travelEmission = 45.5;
     final double wasteEmission = 12.3;
@@ -366,6 +366,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   label: '差旅',
                   value: '${travelEmission.toStringAsFixed(1)} kg',
                   color: Colors.blue.shade400,
+                  context: context,
                 ),
               ),
               const SizedBox(width: 16),
@@ -374,6 +375,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   label: '廢棄物',
                   value: '${wasteEmission.toStringAsFixed(1)} kg',
                   color: Colors.green.shade400,
+                  context: context,
                 ),
               ),
             ],
@@ -423,6 +425,7 @@ class _DashboardPageState extends State<DashboardPage> {
     required String label,
     required String value,
     required Color color,
+    required BuildContext context,
   }) {
     return Container(
       decoration: BoxDecoration(
