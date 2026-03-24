@@ -34,7 +34,7 @@ class EcoSensingApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF5B8FF9), brightness: Brightness.dark),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.light, // 跟隨系統主題
+      themeMode: ThemeMode.system, // 跟隨系統主題
       home: const LoginPage(),
     );
   }

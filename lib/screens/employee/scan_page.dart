@@ -259,15 +259,6 @@ class _ScanPageState extends State<ScanPage> {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: _takePhoto,
-                  icon: const Icon(Icons.camera),
-                  label: const Text('拍照'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                ElevatedButton.icon(
                   onPressed: _showQRCodePopup,
                   icon: const Icon(Icons.qr_code),
                   label: const Text('我的QR Code'),
