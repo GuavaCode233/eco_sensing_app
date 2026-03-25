@@ -16,14 +16,8 @@ class DashboardPage extends ConsumerWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 員工儀表板頂部背景與資訊
-            const DashboardHeader(),
             // 頁面內容 - 使用 SafeArea 處理底部安全區域
             SafeArea(
-              top: false,
-              bottom: true,
-              child: Transform.translate(
-                offset: const Offset(0, -40), // 向上移動 40 像素，讓內容更貼近頂部背景
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -32,6 +26,9 @@ class DashboardPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // 頂部用戶信息卡片
+                      const DashboardHeader(),
+                      const SizedBox(height: 16),
                       // 經驗值進度卡
                       const ExperienceBarCard(),
                       const SizedBox(height: 16),
@@ -73,7 +70,6 @@ class DashboardPage extends ConsumerWidget {
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

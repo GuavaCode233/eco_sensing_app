@@ -11,26 +11,22 @@ class DashboardHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfile = ref.watch(currentUserProvider); // 從 provider 獲取用戶資料
 
-    return Stack(
+    return Column(
       children: [
         // 頂部漸變背景
         Container(
-          height: 200 + MediaQuery.of(context).padding.top,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF5B8FF9), Color(0xFF4A7FD9)],
-            ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: MediaQuery.of(context).padding.top + 8,
-            bottom: 8,
-          ),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               // 用戶信息區塊
@@ -104,7 +100,8 @@ class DashboardHeader extends ConsumerWidget {
                     child: _buildInfoTile(
                       icon: Icons.eco_outlined,
                       label: '碳幣',
-                      value: userProfile.tokens.toString(), // 從 userProfile 獲取碳幣數量
+                      value: userProfile.tokens
+                          .toString(), // 從 userProfile 獲取碳幣數量
                       backgroundColor: Colors.green,
                       context: context,
                     ),
@@ -140,7 +137,7 @@ class DashboardHeader extends ConsumerWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
+              color: Colors.black,
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
