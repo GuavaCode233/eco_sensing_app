@@ -89,14 +89,18 @@ final allAchievementsProvider = Provider<List<Achievement>>((ref) {
 
 /// 用戶成就列表（管理已獲得和展示狀態）
 final userAchievementsProvider =
-    StateNotifierProvider<UserAchievementsNotifier, List<Achievement>>((ref) {
-      final allAchievements = ref.watch(allAchievementsProvider);
-      return UserAchievementsNotifier(allAchievements);
+    NotifierProvider<UserAchievementsNotifier, List<Achievement>>(() {
+      return UserAchievementsNotifier();
     });
 
 /// 用戶成就狀態管理器
-class UserAchievementsNotifier extends StateNotifier<List<Achievement>> {
-  UserAchievementsNotifier(super.initialState);
+class UserAchievementsNotifier extends Notifier<List<Achievement>> {
+  @override
+  List<Achievement> build() {
+    // 初始狀態為所有成就列表，未來可改為從後端 API 獲取用戶的成就狀態
+    final allAchievements = ref.watch(allAchievementsProvider);
+    return allAchievements;
+  }
 
   /// 切換成就展示狀態
   void toggleAchievementDisplay(int achievementId) {

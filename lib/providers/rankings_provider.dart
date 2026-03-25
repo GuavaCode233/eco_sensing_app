@@ -38,13 +38,16 @@ DepartmentMetric getDepartmentMetric(String department) {
 
 /// 當前選中的部門 provider
 final selectedDepartmentProvider =
-    StateNotifierProvider<SelectedDepartmentNotifier, String>((ref) {
-      return SelectedDepartmentNotifier('業務部');
+    NotifierProvider<SelectedDepartmentNotifier, String>(() {
+      return SelectedDepartmentNotifier();
     });
 
 /// 部門選擇狀態管理器
-class SelectedDepartmentNotifier extends StateNotifier<String> {
-  SelectedDepartmentNotifier(super.initialState);
+class SelectedDepartmentNotifier extends Notifier<String> {
+  @override
+  String build() {
+    return '業務部'; // 預設選擇業務部
+  }
 
   /// 切換部門
   void selectDepartment(String department) {

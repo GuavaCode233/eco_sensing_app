@@ -124,21 +124,24 @@ final allActivitiesProvider = Provider<List<CarbonActivity>>((ref) {
 
 /// 用戶已完成的活動 ID 集合
 final completedActivitiesProvider =
-    StateNotifierProvider<CompletedActivitiesNotifier, Set<int>>((ref) {
-      return CompletedActivitiesNotifier({});
+    NotifierProvider<CompletedActivitiesNotifier, Set<int>>(() {
+      return CompletedActivitiesNotifier();
     });
 
 /// 完成活動狀態管理器
-class CompletedActivitiesNotifier extends StateNotifier<Set<int>> {
-  CompletedActivitiesNotifier(super.initialState);
+class CompletedActivitiesNotifier extends Notifier<Set<int>> {
+  @override
+  Set<int> build() {
+    return {};
+  }
 
   /// 標記活動為已完成
-  void completeActivity(int activityId) {
+  void markAsCompleted(int activityId) {
     state = {...state, activityId};
   }
 
   /// 取消活動完成狀態
-  void uncompleteActivity(int activityId) {
+  void removeCompletion(int activityId) {
     state = state.where((id) => id != activityId).toSet();
   }
 
@@ -150,13 +153,16 @@ class CompletedActivitiesNotifier extends StateNotifier<Set<int>> {
 
 /// 按分類篩選活動的 provider
 final activitiesByCategoryProvider =
-    StateNotifierProvider<CategoryFilterNotifier, String?>((ref) {
-      return CategoryFilterNotifier(null);
+    NotifierProvider<CategoryFilterNotifier, String?>(() {
+      return CategoryFilterNotifier();
     });
 
 /// 分類篩選狀態管理器
-class CategoryFilterNotifier extends StateNotifier<String?> {
-  CategoryFilterNotifier(super.initialState);
+class CategoryFilterNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    return null; // 初始狀態為不篩選
+  }
 
   /// 設定篩選分類
   void setCategory(String? category) {
