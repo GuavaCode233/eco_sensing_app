@@ -16,23 +16,23 @@ class DashboardPage extends ConsumerWidget {
 
     return Scaffold(
       body: SingleChildScrollView(
-        child: Stack(
+        child: Column(
           children: [
             // 員工儀表板頂部背景與資訊
-            DashboardHeader(),
-            // 頁面內容
+            const DashboardHeader(),
+            // 頁面內容 - 使用 SafeArea 處理底部安全區域
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 24,
+                  vertical: 16,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 碳排數據卡片
-                    CarbonCompositionCard(),
-                    const SizedBox(height: 18),
+                    const CarbonCompositionCard(),
+                    const SizedBox(height: 16),
 
                     // 暫時的登出按鈕，未來會放在個人中心頁面
                     SizedBox(

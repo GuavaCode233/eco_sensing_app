@@ -31,7 +31,7 @@ class CarbonCompositionCard extends ConsumerWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -41,12 +41,12 @@ class CarbonCompositionCard extends ConsumerWidget {
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // 圓餅圖
           Center(
             child: SizedBox(
-              height: 220,
+              height: 200,
               child: PieChart(
                 PieChartData(
                   sections: [
@@ -55,9 +55,9 @@ class CarbonCompositionCard extends ConsumerWidget {
                       value: travelEmission,
                       title:
                           '${(travelEmission / totalEmission * 100).toStringAsFixed(1)}%',
-                      radius: 80,
+                      radius: 70,
                       titleStyle: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -67,21 +67,21 @@ class CarbonCompositionCard extends ConsumerWidget {
                       value: wasteEmission,
                       title:
                           '${(wasteEmission / totalEmission * 100).toStringAsFixed(1)}%',
-                      radius: 80,
+                      radius: 70,
                       titleStyle: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
                   ],
                   centerSpaceRadius: 0,
-                  sectionsSpace: 3,
+                  sectionsSpace: 2,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // 圖例和數據
           Row(
@@ -94,7 +94,7 @@ class CarbonCompositionCard extends ConsumerWidget {
                   context: context,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: _buildEmissionLegend(
                   label: '廢棄物',
@@ -105,7 +105,7 @@ class CarbonCompositionCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // 總計
           Container(
@@ -120,7 +120,7 @@ class CarbonCompositionCard extends ConsumerWidget {
                 ).colorScheme.primary.withValues(alpha: 0.3),
               ),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -128,11 +128,11 @@ class CarbonCompositionCard extends ConsumerWidget {
                   '本月總碳排量',
                   style: Theme.of(
                     context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   '${totalEmission.toStringAsFixed(1)} kg',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,
                   ),

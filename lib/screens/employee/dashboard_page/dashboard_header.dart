@@ -1,4 +1,3 @@
-import 'package:eco_sensing_app/models/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,45 +11,43 @@ class DashboardHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfile = ref.watch(currentUserProvider); // 從 provider 獲取用戶資料
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Stack(
-        children: [
-          // 頂部漸變背景
-          Container(
-            height: 200 + MediaQuery.of(context).padding.top,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF5B8FF9), Color(0xFF4A7FD9)],
-              ),
+    return Stack(
+      children: [
+        // 頂部漸變背景
+        Container(
+          height: 200 + MediaQuery.of(context).padding.top,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF5B8FF9), Color(0xFF4A7FD9)],
             ),
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              child: Column(
-                children: [
-                  // 用戶信息區塊
-                  _buildUserInfoCard(context, userProfile: userProfile),
-                  const SizedBox(height: 18),
-
-                  _buildExperienceBarCard(context, userProfile: userProfile),
-                  const SizedBox(height: 18),
-                ],
-              ),
-            ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: MediaQuery.of(context).padding.top + 8,
+            bottom: 8,
           ),
-        ],
-      ),
+          child: Column(
+            children: [
+              // 用戶信息區塊
+              _buildUserInfoCard(context, userProfile: userProfile),
+              const SizedBox(height: 12),
+              _buildExperienceBarCard(context, userProfile: userProfile),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   // 用戶信息卡片
   Widget _buildUserInfoCard(BuildContext context, {required userProfile}) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -82,7 +79,7 @@ class DashboardHeader extends ConsumerWidget {
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        '王小民', // TODO: 從 userProfile 獲取用戶名
+                        userProfile.displayName, // 從 userProfile 獲取用戶名
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -99,7 +96,7 @@ class DashboardHeader extends ConsumerWidget {
                     child: _buildInfoTile(
                       icon: Icons.star,
                       label: 'Lv.',
-                      value: '7', // TODO: 從 userProfile 獲取等級
+                      value: userProfile.level.toString(), // 從 userProfile 獲取等級
                       backgroundColor: Colors.amber,
                       context: context,
                     ),
@@ -109,7 +106,7 @@ class DashboardHeader extends ConsumerWidget {
                     child: _buildInfoTile(
                       icon: Icons.eco_outlined,
                       label: '碳幣',
-                      value: '1250', // TODO: 從 userProfile 獲取碳幣數量
+                      value: userProfile.tokens.toString(), // 從 userProfile 獲取碳幣數量
                       backgroundColor: Colors.green,
                       context: context,
                     ),
@@ -168,7 +165,7 @@ class DashboardHeader extends ConsumerWidget {
     // 經驗值進度卡
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -178,7 +175,7 @@ class DashboardHeader extends ConsumerWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -192,14 +189,17 @@ class DashboardHeader extends ConsumerWidget {
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
-                '',
+                '${userProfile.totalExp} / 500',
                 style: Theme.of(
                   context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           _buildExperienceBar(context, userProfile: userProfile),
         ],
       ),
