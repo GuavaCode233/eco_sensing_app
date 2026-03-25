@@ -1,10 +1,10 @@
-import 'package:eco_sensing_app/screens/employee/scan_page.dart';
+import 'package:eco_sensing_app/screens/employee/scan_page/scan_page.dart';
 import 'package:flutter/material.dart';
 
-import 'dashboard_page.dart';
-import 'i_reduce_carbon_page.dart';
-import 'leaderboard_page.dart';
-import 'profile_page.dart';
+import 'dashboard_page/dashboard_page.dart';
+import 'actions_page/actions_page.dart';
+import 'leaderboard_page/leaderboard_page.dart';
+import 'profile_page/profile_page.dart';
 
 // 員工首頁
 class EmployeeHomePage extends StatefulWidget {
