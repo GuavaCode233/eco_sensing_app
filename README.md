@@ -4,7 +4,6 @@
 ![Dart](https://img.shields.io/badge/Dart-%230175C2.svg?style=flat&logo=dart&logoColor=white)
 ![Riverpod](https://img.shields.io/badge/Riverpod-State_Management-blue)
 ![Status](https://img.shields.io/badge/Status-Active_Development-brightgreen)
-![NSTC](https://img.shields.io/badge/Project-國科會研究計畫-orange)
 
 > **結合「數位與綠色雙軸轉型」，為企業打造的非侵入式範疇三碳盤查與員工減碳行為激勵 App。**
 
