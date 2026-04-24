@@ -1,14 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'achievements_tab.dart';
+import 'profile_info_tab.dart';
+import 'settings_tab.dart';
 
 // 索引 4: 個人頁面，資料維護、系統設定
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           // 頂部漸變背景 - 藍色
           Container(
-            height: 200 + MediaQuery.of(context).padding.top,
+            height: 240 + MediaQuery.of(context).padding.top,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -40,51 +60,78 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ),
-                // 主要內容區域
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        // 待開發提示
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                blurRadius: 12,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
+                // Tab 頭部
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 12,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: const Color(0xFF5B8FF9),
+                      unselectedLabelColor: Colors.grey[600],
+                      labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      indicator: BoxDecoration(
+                        color: const Color(0xFF5B8FF9).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      tabs: [
+                        Tab(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.person,
-                                size: 64,
-                                color: const Color(0xFF5B8FF9),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                '個人中心',
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                '此頁面正在開發中...',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                textAlign: TextAlign.center,
-                              ),
+                              const Icon(Icons.person),
+                              const SizedBox(width: 6),
+                              const Text('資料'),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        Tab(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.emoji_events),
+                              const SizedBox(width: 6),
+                              const Text('成就'),
+                            ],
+                          ),
+                        ),
+                        Tab(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.settings),
+                              const SizedBox(width: 6),
+                              const Text('設定'),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Tab 內容
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: const [
+                      // 資料標籤
+                      ProfileInfoTab(),
+                      // 成就標籤
+                      AchievementsTab(),
+                      // 設定標籤
+                      SettingsTab(),
+                    ],
                   ),
                 ),
               ],
