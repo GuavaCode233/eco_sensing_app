@@ -57,12 +57,25 @@ class _EcoSensingAppState extends ConsumerState<EcoSensingApp> {
     // uri 會長這樣: https://yourdomain.com/app?counter=5
     // 我們可以把 counter 提取出來
     final counterValue = uri.queryParameters['counter'];
+    if(counterValue == null) {return;}
+
+    _nfcMessage = "成功接收 NFC 資料！\nCounter: $counterValue";
+
+    final floor = int.tryParse(counterValue);
     
-    if (counterValue != null) {
-      setState(() {
-        _nfcMessage = "成功接收 NFC 資料！\nCounter: $counterValue";
-      });
-    }  }
+    // TODO: 登入邏輯判斷
+    // final isLoggedIn = ref.read(currentUserProvider).account.isNotEmpty; // 判斷是否已登入
+
+    // if (isLoggedIn) {
+    //   // 情況 A：已經登入了！直接紀錄搭電梯
+    //   ref.read(elevatorProvider.notifier).recordNfcScan(floor);
+    // } else {
+    //   // 情況 B：還沒登入！先把這個樓層「暫存」起來，等他登入再處理
+    //   ref.read(pendingNfcProvider.notifier).state = floor;
+    //   print("尚未登入，已將 NFC 動作加入待辦佇列");
+    // }
+
+ }
 
   @override
   void dispose() {
