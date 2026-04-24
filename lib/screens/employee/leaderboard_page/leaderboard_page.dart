@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'department_selector.dart';
+import 'leaderboard_header.dart';
+import 'metrics_info_card.dart';
+import 'rankings_list.dart';
 
 // 索引 3: 部門內排行榜
-class LeaderboardPage extends StatefulWidget {
+class LeaderboardPage extends ConsumerWidget {
   const LeaderboardPage({super.key});
 
   @override
-  State<LeaderboardPage> createState() => _LeaderboardPageState();
-}
-
-class _LeaderboardPageState extends State<LeaderboardPage> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: Stack(
         children: [
@@ -40,53 +41,17 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                     ),
                   ),
                 ),
-                // 主要內容區域
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        // 待開發提示
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                blurRadius: 12,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.leaderboard,
-                                size: 64,
-                                color: const Color(0xFFF6BD16),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                '部門排行榜',
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                '此頁面正在開發中...',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
-                ),
+                // 個人排名卡片
+                const LeaderboardHeader(),
+                const SizedBox(height: 16),
+                // 部門選擇器
+                const DepartmentSelector(),
+                const SizedBox(height: 16),
+                // 指標信息卡片
+                const MetricsInfoCard(),
+                const SizedBox(height: 16),
+                // 排行清單
+                const RankingsList(),
               ],
             ),
           ),

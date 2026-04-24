@@ -18,58 +18,58 @@ class DashboardPage extends ConsumerWidget {
           children: [
             // 頁面內容 - 使用 SafeArea 處理底部安全區域
             SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 頂部用戶信息卡片
-                      const DashboardHeader(),
-                      const SizedBox(height: 16),
-                      // 經驗值進度卡
-                      const ExperienceBarCard(),
-                      const SizedBox(height: 16),
-                      // 碳排數據卡片
-                      const CarbonCompositionCard(),
-                      const SizedBox(height: 16),
-                      // 暫時的登出按鈕，未來會放在個人中心頁面
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (context) => const LoginPage(),
-                              ),
-                              (Route<dynamic> route) => false,
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: const BorderSide(
-                              color: Color(0xFF5B8FF9),
-                              width: 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 頂部用戶信息卡片
+                    const DashboardHeader(),
+                    const SizedBox(height: 16),
+                    // 經驗值進度卡
+                    const ExperienceBarCard(),
+                    const SizedBox(height: 16),
+                    // 碳排數據卡片
+                    const CarbonCompositionCard(),
+                    const SizedBox(height: 16),
+                    // 暫時的登出按鈕，未來會放在個人中心頁面
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
+                            (Route<dynamic> route) => false,
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(
+                            color: Color(0xFF5B8FF9),
+                            width: 1,
                           ),
-                          child: const Text(
-                            '登出',
-                            style: TextStyle(
-                              color: Color(0xFF5B8FF9),
-                              fontWeight: FontWeight.bold,
-                            ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: const Text(
+                          '登出',
+                          style: TextStyle(
+                            color: Color(0xFF5B8FF9),
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+            ),
           ],
         ),
       ),

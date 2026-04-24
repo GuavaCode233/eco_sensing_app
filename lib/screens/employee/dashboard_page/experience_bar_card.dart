@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,12 +15,20 @@ class ExperienceBarCard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-            _buildExperienceBarCard(context, userProfile: userProfile, expPerLevel: expPerLevel),
+        _buildExperienceBarCard(
+          context,
+          userProfile: userProfile,
+          expPerLevel: expPerLevel,
+        ),
       ],
     );
   }
 
-    Widget _buildExperienceBarCard(BuildContext context, {required userProfile, required expPerLevel}) {
+  Widget _buildExperienceBarCard(
+    BuildContext context, {
+    required userProfile,
+    required expPerLevel,
+  }) {
     // 經驗值進度卡
     return Container(
       decoration: BoxDecoration(
@@ -50,9 +57,7 @@ class ExperienceBarCard extends ConsumerWidget {
               ),
               Text(
                 '${userProfile.totalExp} / $expPerLevel EXP',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey[600],
                   fontWeight: FontWeight.bold,
                 ),
@@ -60,13 +65,21 @@ class ExperienceBarCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _buildExperienceBar(context, userProfile: userProfile, expPerLevel: expPerLevel),
+          _buildExperienceBar(
+            context,
+            userProfile: userProfile,
+            expPerLevel: expPerLevel,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildExperienceBar(BuildContext context, {required userProfile, required expPerLevel}) {
+  Widget _buildExperienceBar(
+    BuildContext context, {
+    required userProfile,
+    required expPerLevel,
+  }) {
     // 經驗值進度條
     return Container(
       width: MediaQuery.of(context).size.width,
@@ -79,7 +92,9 @@ class ExperienceBarCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(4),
         child: FractionallySizedBox(
           alignment: Alignment.topLeft,
-          widthFactor: userProfile.totalExp / expPerLevel, // The progress value (e.g., 0.7 for 70%)
+          widthFactor:
+              userProfile.totalExp /
+              expPerLevel, // The progress value (e.g., 0.7 for 70%)
           child: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
