@@ -24,6 +24,7 @@ class ElevatorNotifier extends Notifier<ElevatorState> {
       int floorsTraveled = (currentScannedFloor - state.entryFloor!).abs();
 
       // TODO: 商業邏輯：計算電梯使用碳排，並給予獎勵
+      print('電梯使用了 $floorsTraveled 層樓，計算碳排並給予獎勵');
 
       // 重製狀態
       state = ElevatorState(entryFloor: null);
