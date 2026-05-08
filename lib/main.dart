@@ -6,6 +6,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'screens/auth/login_screen.dart';
+import 'core/utils/app_observer.dart';
 import 'providers/current_user_provider.dart';
 import 'providers/elevator_provider.dart';
 import 'providers/pending_nfc_provider.dart';
@@ -13,6 +14,7 @@ import 'providers/pending_nfc_provider.dart';
 void main() {
   runApp(
     ProviderScope(
+      observers: [AppObserver()],
       child: DevicePreview(
         enabled: !kReleaseMode,
         builder: (context) => const EcoSensingApp(),
