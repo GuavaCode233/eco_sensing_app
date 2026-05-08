@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/action_tasks_provider.dart';
 import 'action_task_card.dart';
 
-// 索引 1: i減碳，減碳活動/任務推薦頁面
+/// 索引 1: i減碳，減碳活動/任務推薦頁面
 class IReduceCarbonPage extends ConsumerWidget {
   const IReduceCarbonPage({super.key});
 
@@ -205,7 +205,7 @@ class IReduceCarbonPage extends ConsumerWidget {
     if (task.navigationRoute == '/scan') {
       Navigator.pushNamed(
         context,
-        '/scan',
+        '/scan', // FIXME: 替換為實際的掃描頁面路由
         arguments: {'taskTitle': task.title, 'taskId': task.id},
       );
     }

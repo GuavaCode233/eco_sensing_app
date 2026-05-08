@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'current_user_provider.dart';
+
 /// 電梯碳排 provider
 
 class ElevatorState {
@@ -15,8 +16,7 @@ class ElevatorNotifier extends Notifier<ElevatorState> {
 
   /// 接收到 NFC 掃描事件，記錄進入的樓層
   void recordNfcScan(int currentScannedFloor) {
-
-    if(state.entryFloor == null) {
+    if (state.entryFloor == null) {
       // 第一次掃描，記錄進入的樓層
       state = ElevatorState(entryFloor: currentScannedFloor);
     } else {
@@ -30,3 +30,7 @@ class ElevatorNotifier extends Notifier<ElevatorState> {
     }
   }
 }
+
+final elevatorProvider = NotifierProvider<ElevatorNotifier, ElevatorState>(() {
+  return ElevatorNotifier();
+});
