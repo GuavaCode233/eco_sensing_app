@@ -5,11 +5,11 @@ import 'package:app_links/app_links.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'screens/auth/login_screen.dart';
+import 'features/auth/login_screen.dart';
 import 'core/utils/app_observer.dart';
-import 'providers/current_user_provider.dart';
-import 'providers/elevator_provider.dart';
-import 'providers/pending_nfc_provider.dart';
+import 'features/user/providers/current_user_provider.dart';
+import 'features/iot_sensing/providers/elelvator_iot/elevator_provider.dart';
+import 'features/iot_sensing/providers/elelvator_iot/pending_nfc_provider.dart';
 
 void main() {
   runApp(
