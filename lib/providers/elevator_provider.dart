@@ -24,6 +24,9 @@ class ElevatorNotifier extends Notifier<ElevatorState> {
       int floorsTraveled = (currentScannedFloor - state.entryFloor!).abs();
 
       // TODO: 商業邏輯：計算電梯使用碳排，並給予獎勵
+      if (floorsTraveled > 0) {
+        ref.read(currentUserProvider.notifier).addRewards(exp: 10, coins: 5);
+      }
       
       // 重製狀態
       state = ElevatorState(entryFloor: null);
