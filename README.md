@@ -1,5 +1,5 @@
 # 🍃 Eco-Sensing 企業範疇三碳排 AI 智慧核算助理
-
+## 這個是純的分支
 ![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=flat&logo=Flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-%230175C2.svg?style=flat&logo=dart&logoColor=white)
 ![Riverpod](https://img.shields.io/badge/Riverpod-State_Management-blue)
