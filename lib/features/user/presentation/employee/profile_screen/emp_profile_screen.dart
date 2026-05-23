@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:eco_sensing_app/core/theme/app_colors.dart';
+import 'package:eco_sensing_app/core/theme/app_decorations.dart';
 import 'widgets/achievements_tab.dart';
+import 'widgets/profile_header.dart';
 import 'widgets/profile_info_tab.dart';
 import 'widgets/settings_tab.dart';
 
@@ -32,108 +35,81 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      backgroundColor: AppColors.neutralWarm,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 頂部漸變背景 - 藍色
           Container(
-            height: 240 + MediaQuery.of(context).padding.top,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF5B8FF9), Color(0xFF4A7FD9)],
+            width: double.infinity,
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: MediaQuery.of(context).padding.top + 20,
+              bottom: 24,
+            ),
+            decoration: AppDecorations.featureBand(),
+            child: const ProfileHeader(),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(AppDecorations.cardRadius),
+                boxShadow: AppDecorations.cardShadow,
+              ),
+              child: TabBar(
+                controller: _tabController,
+                labelColor: AppColors.greenAccent,
+                unselectedLabelColor: AppColors.textSecondary,
+                labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+                indicator: BoxDecoration(
+                  color: AppColors.greenLight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                tabs: const [
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.person),
+                        SizedBox(width: 6),
+                        Text('資料'),
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.emoji_events),
+                        SizedBox(width: 6),
+                        Text('成就'),
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.settings),
+                        SizedBox(width: 6),
+                        Text('設定'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          // 頁面內容
-          SafeArea(
-            child: Column(
-              children: [
-                // 頁面標題
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    '個人中心',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                // Tab 頭部
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.95),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 12,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      labelColor: const Color(0xFF5B8FF9),
-                      unselectedLabelColor: Colors.grey[600],
-                      labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                      indicator: BoxDecoration(
-                        color: const Color(0xFF5B8FF9).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      tabs: [
-                        Tab(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.person),
-                              const SizedBox(width: 6),
-                              const Text('資料'),
-                            ],
-                          ),
-                        ),
-                        Tab(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.emoji_events),
-                              const SizedBox(width: 6),
-                              const Text('成就'),
-                            ],
-                          ),
-                        ),
-                        Tab(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.settings),
-                              const SizedBox(width: 6),
-                              const Text('設定'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Tab 內容
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: const [
-                      // 資料標籤
-                      ProfileInfoTab(),
-                      // 成就標籤
-                      AchievementsTab(),
-                      // 設定標籤
-                      SettingsTab(),
-                    ],
-                  ),
-                ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: const [
+                ProfileInfoTab(),
+                AchievementsTab(),
+                SettingsTab(),
               ],
             ),
           ),

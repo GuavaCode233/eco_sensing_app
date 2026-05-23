@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:eco_sensing_app/core/theme/app_colors.dart';
 import '../../../../../gamification/models/achievement.dart';
 import '../../../../../gamification/providers/achievements_provider.dart';
 
 class AchievementsTab extends ConsumerStatefulWidget {
   const AchievementsTab({super.key});
+
+  static const _unlockedBg = Color(0xFFE8F5E9);
+  static const _unlockedBorder = Color(0xFFA5D6A7);
+  static const _iconBg = Color(0xFFC8E6C9);
+  static const _achievementGreen = Color(0xFF2E7D32);
 
   @override
   ConsumerState<AchievementsTab> createState() => _AchievementsTabState();
@@ -30,25 +36,33 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
 
   @override
   Widget build(BuildContext context) {
-    final earnedAchievements = ref.watch(earnedAchievementsProvider);
-    final displayedAchievements = earnedAchievements
-        .where((a) => a.displayed)
-        .toList();
+    final allAchievements = ref.watch(userAchievementsProvider);
+    final earnedCount = allAchievements.where((a) => a.earned).length;
+    final displayedCount = allAchievements.where((a) => a.displayed).length;
+    final totalCount = allAchievements.length;
+    final remaining = totalCount - earnedCount;
 
     return Column(
       children: [
-        // Tab 頭部
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: _UnlockSummary(
+            earnedCount: earnedCount,
+            totalCount: totalCount,
+            remaining: remaining,
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.neutralCool,
               borderRadius: BorderRadius.circular(10),
             ),
             child: TabBar(
               controller: _tabController,
-              labelColor: const Color(0xFF5B8FF9),
-              unselectedLabelColor: Colors.grey[600],
+              labelColor: AppColors.greenAccent,
+              unselectedLabelColor: AppColors.textSecondary,
               labelStyle: const TextStyle(fontWeight: FontWeight.bold),
               indicator: BoxDecoration(
                 color: Colors.white,
@@ -59,9 +73,9 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.card_membership),
-                      const SizedBox(width: 8),
-                      Text('我的成就 (${earnedAchievements.length})'),
+                      const Icon(Icons.card_membership, size: 18),
+                      const SizedBox(width: 6),
+                      Text('我的成就 ($earnedCount)'),
                     ],
                   ),
                 ),
@@ -69,9 +83,9 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.collections),
-                      const SizedBox(width: 8),
-                      Text('展示櫃 (${displayedAchievements.length})'),
+                      const Icon(Icons.collections, size: 18),
+                      const SizedBox(width: 6),
+                      Text('展示櫃 ($displayedCount)'),
                     ],
                   ),
                 ),
@@ -79,15 +93,12 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
             ),
           ),
         ),
-        // Tab 內容
         Expanded(
           child: TabBarView(
             controller: _tabController,
             children: [
-              // 所有成就標籤
-              _buildAchievementsTab(earnedAchievements),
-              // 展示櫃標籤
-              _buildShowcaseTab(earnedAchievements),
+              _buildAchievementsTab(allAchievements),
+              _buildShowcaseTab(allAchievements),
             ],
           ),
         ),
@@ -97,7 +108,7 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
 
   Widget _buildAchievementsTab(List<Achievement> achievements) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Column(
         children: [
           GridView.builder(
@@ -105,9 +116,9 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.85,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 1.15,
             ),
             itemCount: achievements.length,
             itemBuilder: (context, index) {
@@ -129,54 +140,39 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
   }
 
   Widget _buildShowcaseTab(List<Achievement> allAchievements) {
-    final displayedAchievements = allAchievements
-        .where((a) => a.displayed)
-        .toList();
+    final displayedAchievements =
+        allAchievements.where((a) => a.displayed).toList();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Column(
         children: [
-          // 展示櫃編輯按鈕
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   '目前展示 ${displayedAchievements.length} 項成就',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-                _isEditingShowcase
-                    ? Row(
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _isEditingShowcase = false;
-                              });
-                            },
-                            child: const Text('完成'),
-                          ),
-                        ],
-                      )
-                    : TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _isEditingShowcase = true;
-                          });
-                        },
-                        child: const Text('編輯'),
-                      ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isEditingShowcase = !_isEditingShowcase;
+                    });
+                  },
+                  child: Text(_isEditingShowcase ? '完成' : '編輯'),
+                ),
               ],
             ),
           ),
           if (displayedAchievements.isEmpty)
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.neutralCool,
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(32),
@@ -186,16 +182,16 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
                   const SizedBox(height: 16),
                   Text(
                     '還沒有展示任何成就',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '前往「我的成就」選擇要展示的成就',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[500],
+                    ),
                   ),
                 ],
               ),
@@ -206,9 +202,9 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.85,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1.15,
               ),
               itemCount: displayedAchievements.length,
               itemBuilder: (context, index) {
@@ -234,90 +230,125 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
     Achievement achievement, {
     required VoidCallback onToggleDisplay,
   }) {
+    final earned = achievement.earned;
+    // ignore: deprecated_member_use — 依設計規格使用 surfaceVariant
+    final lockedBg =
+        Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.6);
+    final progress = _lockedProgress(achievement);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        color: earned ? AchievementsTab._unlockedBg : lockedBg,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: achievement.displayed
-              ? const Color(0xFF5B8FF9).withValues(alpha: 0.3)
-              : Colors.grey[300]!,
-          width: 1.5,
+          color: earned ? AchievementsTab._unlockedBorder : AppColors.ceramic,
+          width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Stack(
         children: [
-          // 成就圖標
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFF5B8FF9).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              _getIconData(achievement.icon),
-              size: 32,
-              color: const Color(0xFF5B8FF9),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // 成就名稱
-          Text(
-            achievement.title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          // 成就描述
-          Text(
-            achievement.description,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 8),
-          // 展示按鈕
-          Expanded(
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onToggleDisplay,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: achievement.displayed
-                      ? const Color(0xFF5B8FF9)
-                      : Colors.grey[300],
-                  foregroundColor: achievement.displayed
-                      ? Colors.white
-                      : Colors.grey[700],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: earned
+                      ? AchievementsTab._iconBg
+                      : Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  achievement.displayed ? '已展示' : '展示',
-                  style: const TextStyle(fontSize: 12),
+                child: Icon(
+                  _getIconData(achievement.icon),
+                  size: 22,
+                  color: earned
+                      ? AchievementsTab._achievementGreen
+                      : Colors.grey.shade500,
                 ),
               ),
-            ),
+              const SizedBox(height: 6),
+              Text(
+                achievement.title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: earned ? null : Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                achievement.description,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 10,
+                ),
+              ),
+              const Spacer(),
+              if (!earned && progress != null) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: progress.current / progress.target,
+                    minHeight: 4,
+                    backgroundColor: AppColors.ceramic,
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AchievementsTab._achievementGreen,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '${progress.current}/${progress.target} 次',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: AchievementsTab._achievementGreen,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ] else if (earned)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Transform.scale(
+                        scale: 0.75,
+                        child: Switch(
+                          value: achievement.displayed,
+                          onChanged: (_) => onToggleDisplay(),
+                          activeTrackColor: AchievementsTab._achievementGreen,
+                          activeThumbColor: Colors.white,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ),
+                      if (achievement.displayed)
+                        const Text(
+                          '展示中',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AchievementsTab._achievementGreen,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
           ),
+          if (earned)
+            const Positioned(
+              top: 0,
+              right: 0,
+              child: _CircleBadge(icon: Icons.check),
+            ),
         ],
       ),
     );
@@ -328,104 +359,97 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
     required bool isEditing,
     required VoidCallback onToggleDisplay,
   }) {
-    return Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFF6BD16).withValues(alpha: 0.3),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Column(
+    return Container(
+      decoration: BoxDecoration(
+        color: AchievementsTab._unlockedBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AchievementsTab._unlockedBorder,
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Stack(
+        children: [
+          Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 成就圖標
               Container(
-                width: 60,
-                height: 60,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF6BD16).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: AchievementsTab._iconBg,
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   _getIconData(achievement.icon),
-                  size: 32,
-                  color: const Color(0xFFF6BD16),
+                  size: 22,
+                  color: AchievementsTab._achievementGreen,
                 ),
               ),
-              const SizedBox(height: 8),
-              // 成就名稱
+              const SizedBox(height: 6),
               Text(
                 achievement.title,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              const SizedBox(height: 4),
-              // 成就描述
+              const SizedBox(height: 2),
               Text(
                 achievement.description,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: Colors.grey[600]),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 10,
+                ),
               ),
-              if (isEditing)
-                Expanded(
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: onToggleDisplay,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[300],
-                        foregroundColor: Colors.grey[700],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                      ),
-                      child: const Text('移除', style: TextStyle(fontSize: 12)),
+              if (isEditing) ...[
+                const Spacer(),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: onToggleDisplay,
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      foregroundColor: AppColors.textSecondary,
                     ),
+                    child: const Text('移除', style: TextStyle(fontSize: 12)),
                   ),
                 ),
+              ],
             ],
           ),
-        ),
-        if (!isEditing)
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFF6BD16),
-                shape: BoxShape.circle,
-              ),
-              padding: const EdgeInsets.all(4),
-              child: const Icon(Icons.star, size: 16, color: Colors.white),
+          if (!isEditing)
+            const Positioned(
+              top: 0,
+              right: 0,
+              child: _CircleBadge(icon: Icons.star, iconSize: 10),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
+  /// UI-only：從描述文字推算未解鎖成就的展示進度
+  ({int current, int target})? _lockedProgress(Achievement achievement) {
+    if (achievement.earned) return null;
+    final match = RegExp(r'(\d+)').firstMatch(achievement.description);
+    if (match == null) return null;
+    final target = int.parse(match.group(1)!);
+    if (target <= 1) return (current: 0, target: target);
+    final current = ((achievement.id * 11 + 7) % target).clamp(1, target - 1);
+    return (current: current, target: target);
+  }
+
   IconData _getIconData(String iconName) {
-    final iconMap = {
+    const iconMap = {
       'directions_bus': Icons.directions_bus,
       'two_wheeler': Icons.two_wheeler,
       'directions_walk': Icons.directions_walk,
@@ -438,5 +462,84 @@ class _AchievementsTabState extends ConsumerState<AchievementsTab>
       'description': Icons.description,
     };
     return iconMap[iconName] ?? Icons.star;
+  }
+}
+
+class _UnlockSummary extends StatelessWidget {
+  const _UnlockSummary({
+    required this.earnedCount,
+    required this.totalCount,
+    required this.remaining,
+  });
+
+  final int earnedCount;
+  final int totalCount;
+  final int remaining;
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = totalCount > 0 ? earnedCount / totalCount : 0.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              '已解鎖 $earnedCount / $totalCount',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AchievementsTab._achievementGreen,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor: AppColors.ceramic,
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AchievementsTab._achievementGreen,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '還差 $remaining 個解鎖全部',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CircleBadge extends StatelessWidget {
+  const _CircleBadge({
+    required this.icon,
+    this.iconSize = 12,
+  });
+
+  final IconData icon;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 18,
+      height: 18,
+      decoration: const BoxDecoration(
+        color: AchievementsTab._achievementGreen,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, size: iconSize, color: Colors.white),
+    );
   }
 }

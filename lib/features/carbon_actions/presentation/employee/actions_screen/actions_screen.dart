@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:eco_sensing_app/core/theme/app_colors.dart';
+import 'package:eco_sensing_app/core/theme/app_decorations.dart';
 import '../../../providers/action_tasks_provider.dart';
+import 'widgets/action_category_selector.dart';
 import 'widgets/action_task_card.dart';
+import 'widgets/action_task_stats_card.dart';
 
 /// 索引 1: i減碳，減碳活動/任務推薦頁面
 class IReduceCarbonPage extends ConsumerWidget {
@@ -10,64 +14,62 @@ class IReduceCarbonPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasks = ref.watch(availableActionTasksProvider);
+    final tasks = ref.watch(filteredActionTasksProvider);
 
     return Scaffold(
-      body: Stack(
+      backgroundColor: AppColors.neutralWarm,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 頂部漸變背景
           Container(
-            height: 200 + MediaQuery.of(context).padding.top,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF3DBF8A), Color(0xFF1A9E6A)], // 綠色漸變
+            width: double.infinity,
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: MediaQuery.of(context).padding.top + 20,
+              bottom: 40,
+            ),
+            decoration: AppDecorations.featureBand(),
+            child: Text(
+              'i減碳',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: AppColors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          // 頁面內容
-          SafeArea(
-            child: Column(
-              children: [
-                // 頁面標題
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'i減碳',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                // 任務列表
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        ...tasks.map(
-                          (task) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: ActionTaskCard(
-                              task: task,
-                              onInfoPressed: () {
-                                _showTaskExplanation(context, task);
-                              },
-                              onTaskPressed: () {
-                                _handleTaskAction(context, task);
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+          Transform.translate(
+            offset: const Offset(0, -24),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: ActionTaskStatsCard(),
             ),
+          ),
+          const SizedBox(height: 4),
+          const ActionCategorySelector(),
+          const SizedBox(height: 12),
+          Expanded(
+            child: tasks.isEmpty
+                ? _EmptyCategoryHint()
+                : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    itemCount: tasks.length,
+                    itemBuilder: (context, index) {
+                      final task = tasks[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ActionTaskCard(
+                          task: task,
+                          onInfoPressed: () {
+                            _showTaskExplanation(context, task);
+                          },
+                          onTaskPressed: () {
+                            _handleTaskAction(context, task);
+                          },
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -85,12 +87,12 @@ class IReduceCarbonPage extends ConsumerWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3DBF8A).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: AppColors.greenLight,
+                  borderRadius: BorderRadius.circular(AppDecorations.cardRadius),
                 ),
                 child: Icon(
                   _getIconData(task.icon),
-                  color: const Color(0xFF3DBF8A),
+                  color: AppColors.greenAccent,
                 ),
               ),
               const SizedBox(width: 12),
@@ -113,66 +115,35 @@ class IReduceCarbonPage extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
-              // 獎勵信息
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3DBF8A).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.greenLight,
+                  borderRadius: BorderRadius.circular(AppDecorations.cardRadius),
                   border: Border.all(
-                    color: const Color(0xFF3DBF8A).withValues(alpha: 0.2),
+                    color: AppColors.greenAccent.withValues(alpha: 0.2),
                   ),
                 ),
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Column(
-                      children: [
-                        Icon(
-                          Icons.local_fire_department,
-                          color: const Color(0xFFF6BD16),
-                          size: 24,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '經驗值',
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${task.exp}',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFFF6BD16),
-                              ),
-                        ),
-                      ],
+                    _RewardColumn(
+                      icon: Icons.local_fire_department,
+                      label: '經驗值',
+                      value: '${task.exp}',
+                      color: AppColors.gold,
                     ),
-                    Column(
-                      children: [
-                        Icon(
-                          Icons.monetization_on,
-                          color: const Color(0xFF3DBF8A),
-                          size: 24,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '遊戲幣',
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${task.coins}',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF3DBF8A),
-                              ),
-                        ),
-                      ],
+                    _RewardColumn(
+                      icon: Icons.monetization_on,
+                      label: '遊戲幣',
+                      value: '${task.coins}',
+                      color: AppColors.greenAccent,
+                    ),
+                    _RewardColumn(
+                      icon: Icons.eco_outlined,
+                      label: 'CO₂',
+                      value: '${task.co2ReductionKg} kg',
+                      color: AppColors.starbucksGreen,
                     ),
                   ],
                 ),
@@ -186,7 +157,7 @@ class IReduceCarbonPage extends ConsumerWidget {
             ),
           ],
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppDecorations.cardRadius),
           ),
         );
       },
@@ -201,11 +172,10 @@ class IReduceCarbonPage extends ConsumerWidget {
       return;
     }
 
-    // 路由導航至 scan 頁面
     if (task.navigationRoute == '/scan') {
       Navigator.pushNamed(
         context,
-        '/scan', // FIXME: 替換為實際的掃描頁面路由
+        '/scan',
         arguments: {'taskTitle': task.title, 'taskId': task.id},
       );
     }
@@ -217,6 +187,7 @@ class IReduceCarbonPage extends ConsumerWidget {
       'elevator': Icons.elevator,
       'delete_outline': Icons.delete_outline,
       'restaurant': Icons.restaurant,
+      'description': Icons.description,
       'directions_bus': Icons.directions_bus,
       'two_wheeler': Icons.two_wheeler,
       'directions_walk': Icons.directions_walk,
@@ -227,5 +198,74 @@ class IReduceCarbonPage extends ConsumerWidget {
       'ac_unit': Icons.ac_unit,
     };
     return iconMap[iconName] ?? Icons.task;
+  }
+}
+
+class _RewardColumn extends StatelessWidget {
+  const _RewardColumn({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyCategoryHint extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final category = ref.watch(selectedActionTaskCategoryProvider);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox_outlined, size: 48, color: AppColors.textSecondary),
+            const SizedBox(height: 12),
+            Text(
+              '此類別暫無任務',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            if (category != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                '「$category」相關任務即將推出',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }

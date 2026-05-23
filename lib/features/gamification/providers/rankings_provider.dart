@@ -80,10 +80,10 @@ List<RankingEntry> _generateMockRankings(String department) {
       ),
       RankingEntry(
         rank: 2,
-        name: '林小美',
+        name: '李美玲',
         department: '業務部',
         value: 16.2,
-        avatarInitials: 'LX',
+        avatarInitials: 'LM',
         medal: 2,
       ),
       RankingEntry(
@@ -91,23 +91,23 @@ List<RankingEntry> _generateMockRankings(String department) {
         name: '王小明',
         department: '業務部',
         value: 14.8,
-        avatarInitials: 'WX',
+        avatarInitials: '王',
         medal: 3,
         isCurrentUser: true,
       ),
       RankingEntry(
         rank: 4,
-        name: '孫志偉',
+        name: '張偉',
         department: '業務部',
-        value: 12.1,
-        avatarInitials: 'SZ',
+        value: 11.2,
+        avatarInitials: 'ZW',
       ),
       RankingEntry(
         rank: 5,
-        name: '黃美琪',
+        name: '林麗華',
         department: '業務部',
-        value: 11.3,
-        avatarInitials: 'HM',
+        value: 9.7,
+        avatarInitials: 'LL',
       ),
     ],
     '研發部': [
@@ -227,14 +227,9 @@ List<RankingEntry> _generateMockRankings(String department) {
 final currentUserRankingProvider = Provider<RankingEntry?>((ref) {
   final department = ref.watch(selectedDepartmentProvider);
   final rankings = ref.watch(departmentRankingsProvider(department));
-  return rankings.firstWhere(
-    (entry) => entry.isCurrentUser,
-    orElse: () => RankingEntry(
-      rank: 0,
-      name: '未知',
-      department: department,
-      value: 0.0,
-      avatarInitials: '？',
-    ),
-  );
+  try {
+    return rankings.firstWhere((entry) => entry.isCurrentUser);
+  } catch (_) {
+    return null;
+  }
 });

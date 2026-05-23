@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:eco_sensing_app/core/theme/app_colors.dart';
+import 'package:eco_sensing_app/core/theme/app_decorations.dart';
+import 'package:eco_sensing_app/core/widgets/app_card.dart';
+import 'profile_stats_grid.dart';
 import '../../../../providers/current_user_provider.dart';
 
 class ProfileInfoTab extends ConsumerStatefulWidget {
@@ -87,11 +91,7 @@ class _ProfileInfoTabState extends ConsumerState<ProfileInfoTab> {
           // 基本資料卡片
           _buildBasicInfoCard(user),
           const SizedBox(height: 16),
-          // 等級和獎勵卡片
-          _buildLevelAndRewardsCard(user),
-          const SizedBox(height: 16),
-          // 公司和部門卡片（鎖定）
-          _buildLockedInfoCard(user),
+          const AppCard(child: ProfileStatsGrid()),
           const SizedBox(height: 16),
           // 修改密碼部分
           _buildPasswordSection(),
@@ -102,19 +102,7 @@ class _ProfileInfoTabState extends ConsumerState<ProfileInfoTab> {
   }
 
   Widget _buildBasicInfoCard(dynamic user) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -197,133 +185,6 @@ class _ProfileInfoTabState extends ConsumerState<ProfileInfoTab> {
     );
   }
 
-  Widget _buildLevelAndRewardsCard(dynamic user) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '等級與獎勵',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  context,
-                  icon: Icons.stars,
-                  label: '目前等級',
-                  value: 'Lv.${user.level}',
-                  color: const Color(0xFF5B8FF9),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildStatCard(
-                  context,
-                  icon: Icons.local_fire_department,
-                  label: '經驗值',
-                  value: '${user.totalExp}',
-                  color: const Color(0xFFF6BD16),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  context,
-                  icon: Icons.monetization_on,
-                  label: '獎勵貨幣',
-                  value: '${user.tokens}',
-                  color: const Color(0xFF3DBF8A),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.grey[300]!, width: 1),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.trending_up,
-                        color: Colors.grey[600],
-                        size: 24,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '分享檔案',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLockedInfoCard(dynamic user) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey[300]!, width: 1),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.lock, size: 18, color: Colors.grey[600]),
-              const SizedBox(width: 8),
-              Text(
-                '組織資訊（鎖定）',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _buildReadOnlyField('所屬公司', user.company),
-          const SizedBox(height: 12),
-          _buildReadOnlyField('所屬部門', user.department),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPasswordSection() {
     return Column(
       children: [
@@ -339,11 +200,9 @@ class _ProfileInfoTabState extends ConsumerState<ProfileInfoTab> {
               icon: const Icon(Icons.lock),
               label: const Text('修改密碼'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF5B8FF9),
-                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppDecorations.pillRadius),
                 ),
               ),
             ),
@@ -398,10 +257,10 @@ class _ProfileInfoTabState extends ConsumerState<ProfileInfoTab> {
                       child: ElevatedButton(
                         onPressed: _savePassword,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF5B8FF9),
-                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(
+                              AppDecorations.pillRadius,
+                            ),
                           ),
                         ),
                         child: const Text('儲存'),
@@ -444,7 +303,7 @@ class _ProfileInfoTabState extends ConsumerState<ProfileInfoTab> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFF5B8FF9), width: 2),
+          borderSide: const BorderSide(color: AppColors.greenAccent, width: 2),
         ),
         filled: !enabled,
         fillColor: !enabled ? Colors.grey[100] : Colors.white,
@@ -452,65 +311,6 @@ class _ProfileInfoTabState extends ConsumerState<ProfileInfoTab> {
           horizontal: 12,
           vertical: 12,
         ),
-      ),
-    );
-  }
-
-  Widget _buildReadOnlyField(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: Colors.grey[600]),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
       ),
     );
   }

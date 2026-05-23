@@ -1,41 +1,74 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
+import 'package:eco_sensing_app/core/theme/app_colors.dart';
+import 'package:eco_sensing_app/core/theme/app_decorations.dart';
 import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/experience_bar_card.dart';
 import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/carbon_composiotion_card.dart';
 import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/dashboard_header.dart';
-import '../../../auth/login_screen.dart'; // 引入登入頁面，登出後會導航回這裡
+import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/dashboard_hero_metrics.dart';
+import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/daily_carbon_tip_card.dart';
+import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/recent_carbon_records_card.dart';
+import '../../../auth/login_screen.dart';
 
 class DashboardPage extends ConsumerWidget {
-  // 模擬用戶數據
   const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
+      backgroundColor: AppColors.neutralWarm,
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 頁面內容 - 使用 SafeArea 處理底部安全區域
-            SafeArea(
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: MediaQuery.of(context).padding.top + 24,
+                bottom: 48,
+              ),
+              decoration: AppDecorations.featureBand(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '儀表板',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: AppColors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '追蹤您的碳足跡與減碳進度',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.white.withValues(alpha: 0.78),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const DashboardHeroMetrics(),
+                ],
+              ),
+            ),
+            Transform.translate(
+              offset: const Offset(0, -28),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 頂部用戶信息卡片
                     const DashboardHeader(),
                     const SizedBox(height: 16),
-                    // 經驗值進度卡
                     const ExperienceBarCard(),
+                    const SizedBox(height: 12),
+                    const DailyCarbonTipCard(),
                     const SizedBox(height: 16),
-                    // 碳排數據卡片
                     const CarbonCompositionCard(),
                     const SizedBox(height: 16),
-                    // 暫時的登出按鈕，未來會放在個人中心頁面
+                    const RecentCarbonRecordsCard(),
+                    const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
@@ -47,25 +80,10 @@ class DashboardPage extends ConsumerWidget {
                             (Route<dynamic> route) => false,
                           );
                         },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: const BorderSide(
-                            color: Color(0xFF5B8FF9),
-                            width: 1,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text(
-                          '登出',
-                          style: TextStyle(
-                            color: Color(0xFF5B8FF9),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: const Text('登出'),
                       ),
                     ),
+                    SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
                   ],
                 ),
               ),

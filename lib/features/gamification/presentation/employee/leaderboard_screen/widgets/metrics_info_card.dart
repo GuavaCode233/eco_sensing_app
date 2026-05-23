@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:eco_sensing_app/core/theme/app_colors.dart';
+import 'package:eco_sensing_app/core/theme/app_decorations.dart';
 import '../../../../providers/rankings_provider.dart';
 
+/// 排行指標 + 獎勵（橫排精簡版）
 class MetricsInfoCard extends ConsumerWidget {
   const MetricsInfoCard({super.key});
+
+  static const _rewards = [
+    ('1st', '200碳幣', AppColors.gold),
+    ('2nd', '120碳幣', AppColors.silver),
+    ('3rd', '80碳幣', AppColors.bronze),
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -12,82 +21,45 @@ class MetricsInfoCard extends ConsumerWidget {
     final metric = getDepartmentMetric(department);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFFF6BD16).withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: const Color(0xFFF6BD16).withValues(alpha: 0.3),
-            width: 1,
-          ),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppDecorations.cardRadius),
+          border: Border.all(color: AppColors.ceramic),
         ),
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 指標標題
-            Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 20,
-                  color: const Color(0xFFF6BD16),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '排行指標',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // 指標說明
             Text(
-              '${metric.label} (單位: ${metric.unit})',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 12),
-            // 獎勵說明
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
+              '${metric.label} · 單位 ${metric.unit}',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
               ),
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
                 children: [
                   Text(
-                    '🏆 獎勵信息',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    '獎勵：',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  _buildRewardTile(
-                    context,
-                    '1st',
-                    '200 碳幣',
-                    color: const Color(0xFFF6BD16),
-                  ),
-                  const SizedBox(height: 6),
-                  _buildRewardTile(
-                    context,
-                    '2nd',
-                    '120 碳幣',
-                    color: const Color(0xFFB0B7C3),
-                  ),
-                  const SizedBox(height: 6),
-                  _buildRewardTile(
-                    context,
-                    '3rd',
-                    '80 碳幣',
-                    color: const Color(0xFFCD7F32),
+                  const SizedBox(width: 6),
+                  ..._rewards.map(
+                    (r) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _RewardBadge(
+                        rank: r.$1,
+                        reward: r.$2,
+                        color: r.$3,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -97,41 +69,36 @@ class MetricsInfoCard extends ConsumerWidget {
       ),
     );
   }
+}
 
-  /// 獎勵說明磚塊
-  Widget _buildRewardTile(
-    BuildContext context,
-    String rank,
-    String reward, {
-    required Color color,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              rank,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ],
+class _RewardBadge extends StatelessWidget {
+  const _RewardBadge({
+    required this.rank,
+    required this.reward,
+    required this.color,
+  });
+
+  final String rank;
+  final String reward;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppDecorations.pillRadius),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Text(
+        '$rank · $reward',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: color,
         ),
-        Text(
-          reward,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:eco_sensing_app/core/theme/app_colors.dart';
+import 'package:eco_sensing_app/core/theme/app_decorations.dart';
 import '../../../../providers/rankings_provider.dart';
 
 class DepartmentSelector extends ConsumerWidget {
@@ -11,7 +13,7 @@ class DepartmentSelector extends ConsumerWidget {
     final selectedDept = ref.watch(selectedDepartmentProvider);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -28,12 +30,12 @@ class DepartmentSelector extends ConsumerWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFF5B8FF9)
-                        : const Color(0xFFFAFAFC),
+                        ? AppColors.greenAccent
+                        : AppColors.white,
                     border: isSelected
                         ? null
-                        : Border.all(color: const Color(0xFFEEF0F4), width: 1),
-                    borderRadius: BorderRadius.circular(14),
+                        : Border.all(color: AppColors.ceramic, width: 1),
+                    borderRadius: BorderRadius.circular(AppDecorations.pillRadius),
                   ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -43,7 +45,7 @@ class DepartmentSelector extends ConsumerWidget {
                     dept,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : Colors.black,
+                      color: isSelected ? AppColors.white : AppColors.textPrimary,
                     ),
                   ),
                 ),
