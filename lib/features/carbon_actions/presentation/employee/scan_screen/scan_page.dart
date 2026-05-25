@@ -8,6 +8,7 @@ import 'package:eco_sensing_app/core/theme/app_colors.dart';
 import 'package:eco_sensing_app/core/theme/app_decorations.dart';
 import 'widgets/recent_uploads_panel.dart';
 import 'widgets/scan_viewfinder.dart';
+import 'widgets/receipt_confirmation_dialog.dart';
 
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -48,7 +49,7 @@ class _ScanPageState extends State<ScanPage> {
       );
       if (photo != null) {
         setState(() => _selectedImage = File(photo.path));
-        _showUploadConfirmation();
+        _showReceiptConfirmation();
       }
     } catch (e) {
       _showErrorDialog('拍照失敗: $e');
@@ -63,64 +64,70 @@ class _ScanPageState extends State<ScanPage> {
       );
       if (image != null) {
         setState(() => _selectedImage = File(image.path));
-        _showUploadConfirmation();
+        _showReceiptConfirmation();
       }
     } catch (e) {
       _showErrorDialog('選擇照片失敗: $e');
     }
   }
 
-  void _showUploadConfirmation() {
+  void _showReceiptConfirmation() {
+    // 固定假數據模型
+    final mockReceiptData = {
+      'type': 'App乘車截圖',
+      'date': DateTime(2026, 3, 26, 20, 30),
+      'origin': '110台灣臺北市信義區林口街166號4樓',
+      'destination': '337台灣桃園市大園區航站北路9號台灣桃園國際機場第二航廈地下停車場',
+      'totalFee': 1424.00,
+      'actualCarbon': null,
+      'estimatedCarbon': 30.5,
+      'experience': 30,
+      'coin': 1,
+    };
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('確認上傳'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_selectedImage != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppDecorations.cardRadius),
-                child: Image.file(
-                  _selectedImage!,
-                  height: 200,
-                  width: 200,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            const SizedBox(height: 16),
-            const Text('確定要上傳此照片嗎？'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _uploadImage();
-            },
-            child: const Text('確認上傳'),
-          ),
-        ],
+      builder: (context) => ReceiptConfirmationDialog(
+        receiptType: mockReceiptData['type'] as String,
+        receiptDate: mockReceiptData['date'] as DateTime,
+        originLocation: mockReceiptData['origin'] as String,
+        destinationLocation: mockReceiptData['destination'] as String,
+        totalFee: mockReceiptData['totalFee'] as double,
+        actualCarbonFootprint: mockReceiptData['actualCarbon'] as double?,
+        estimatedCarbonFootprint: mockReceiptData['estimatedCarbon'] as double,
+        experienceGain: mockReceiptData['experience'] as int,
+        coinGain: mockReceiptData['coin'] as int,
+        onConfirm: _handleReceiptConfirmation,
+        onCancel: () {
+          setState(() => _selectedImage = null);
+        },
       ),
     );
   }
 
-  void _uploadImage() {
+  void _handleReceiptConfirmation(Map<String, dynamic> editedData) {
+    _uploadImage(editedData);
+  }
+
+  void _uploadImage(Map<String, dynamic> receiptData) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('照片已上傳，AI 辨識中…')));
 
+    // 根据编辑后的收据数据创建上传记录
+    final receiptType = receiptData['type'] as String? ?? '紙本單據';
+    final estimatedCarbon = receiptData['estimatedCarbon'] as double? ?? 0.0;
+    final experience = receiptData['experience'] as int? ?? 0;
+
     setState(() {
       _recentUploads = [
         RecentUploadRecord(
-          title: '紙本單據',
+          title: receiptType,
           timeLabel: '剛剛',
           detail: '審核中',
           status: UploadRecordStatus.reviewing,
+          expGain: experience,
+          co2Kg: estimatedCarbon,
         ),
         ..._recentUploads.take(1),
       ];
@@ -172,16 +179,16 @@ class _ScanPageState extends State<ScanPage> {
             const SizedBox(height: 16),
             Text(
               '員工ID: ${_employeeQRCode.substring(0, 8).toUpperCase()}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               '掃碼器請掃描此QR Code進行識別',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -189,9 +196,9 @@ class _ScanPageState extends State<ScanPage> {
         actions: [
           ElevatedButton.icon(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('QR Code已複製到剪貼簿')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('QR Code已複製到剪貼簿')));
             },
             icon: const Icon(Icons.copy),
             label: const Text('複製ID'),
@@ -206,9 +213,9 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _showViewAllUploads() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('完整上傳紀錄功能開發中')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('完整上傳紀錄功能開發中')));
   }
 
   @override
