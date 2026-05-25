@@ -9,6 +9,7 @@ import 'package:eco_sensing_app/core/theme/app_decorations.dart';
 import 'widgets/recent_uploads_panel.dart';
 import 'widgets/scan_viewfinder.dart';
 import 'widgets/receipt_confirmation_dialog.dart';
+import 'package:eco_sensing_app/features/gamification/presentation/employee/shared/widgets/reward_card.dart';
 
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -109,16 +110,20 @@ class _ScanPageState extends State<ScanPage> {
     _uploadImage(editedData);
   }
 
-  void _uploadImage(Map<String, dynamic> receiptData) {
+  Future<void> _uploadImage(Map<String, dynamic> receiptData) async {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('照片已上傳，AI 辨識中…')));
+    ).showSnackBar(const SnackBar(
+      content: Text('照片已上傳，AI 辨識中…'),
+      duration: Duration(seconds: 2),
+     )
+    );
 
-    // 根据编辑后的收据数据创建上传记录
+    // 根據編輯後的數據更新最近上傳紀錄（實際應該等後端回傳結果）
     final receiptType = receiptData['type'] as String? ?? '紙本單據';
     final estimatedCarbon = receiptData['estimatedCarbon'] as double? ?? 0.0;
     final experience = receiptData['experience'] as int? ?? 0;
-
+    
     setState(() {
       _recentUploads = [
         RecentUploadRecord(
@@ -126,6 +131,31 @@ class _ScanPageState extends State<ScanPage> {
           timeLabel: '剛剛',
           detail: '審核中',
           status: UploadRecordStatus.reviewing,
+          expGain: experience,
+          co2Kg: estimatedCarbon,
+        ),
+        ..._recentUploads.take(1),
+      ];
+      _selectedImage = null;
+    });
+
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    
+    // 這裡直接模擬辨識完成並獲得獎勵，實際應該等後端回傳結果後再更新
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('AI 辨識完成，已獲得 30 經驗值和 1 碳幣')));
+
+    setState(() {
+      _recentUploads = [
+        RecentUploadRecord(
+          title: receiptType,
+          timeLabel: '剛剛',
+          detail: '+30 EXP',
+          status: UploadRecordStatus.completed,
           expGain: experience,
           co2Kg: estimatedCarbon,
         ),
