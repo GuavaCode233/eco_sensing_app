@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:eco_sensing_app/core/theme/app_colors.dart';
 import 'package:eco_sensing_app/core/theme/app_decorations.dart';
+import 'widgets/qr_code_popup.dart';
 import 'widgets/recent_uploads_panel.dart';
 import 'widgets/scan_viewfinder.dart';
 import 'widgets/receipt_confirmation_dialog.dart';
@@ -182,64 +183,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _showQRCodePopup() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('我的QR Code'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 250,
-              height: 250,
-              alignment: Alignment.center,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(AppDecorations.cardRadius),
-                border: Border.all(color: AppColors.greenAccent, width: 2),
-              ),
-              child: QrImageView(
-                data: _employeeQRCode,
-                version: QrVersions.auto,
-                size: 200,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '員工ID: ${_employeeQRCode.substring(0, 8).toUpperCase()}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '掃碼器請掃描此QR Code進行識別',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton.icon(
-            onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('QR Code已複製到剪貼簿')));
-            },
-            icon: const Icon(Icons.copy),
-            label: const Text('複製ID'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('關閉'),
-          ),
-        ],
-      ),
-    );
+    QRCodePopup.show(context);
   }
 
   void _showViewAllUploads() {
