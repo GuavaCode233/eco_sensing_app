@@ -7,13 +7,32 @@ import '../../../providers/action_tasks_provider.dart';
 import 'widgets/action_category_selector.dart';
 import 'widgets/action_task_card.dart';
 import 'widgets/action_task_stats_card.dart';
+import '../../../../gamification/presentation/employee/shared/widgets/reward_card.dart';
 
 /// 索引 1: i減碳，減碳活動/任務推薦頁面
-class IReduceCarbonPage extends ConsumerWidget {
+class IReduceCarbonPage extends ConsumerStatefulWidget {
   const IReduceCarbonPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<IReduceCarbonPage> createState() => _IReduceCarbonPageState();
+}
+
+class _IReduceCarbonPageState extends ConsumerState<IReduceCarbonPage> {
+  @override
+  void initState() {
+    super.initState();
+    // 頁面載入後立即顯示獎勵彈窗
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      
+      // 呼叫您已經寫好的 Popup 靜態方法
+      // 這裡的 context 是 ConsumerState 內建的，可以直接用
+      RewardCard.show(context); 
+      
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final tasks = ref.watch(filteredActionTasksProvider);
 
     return Scaffold(
