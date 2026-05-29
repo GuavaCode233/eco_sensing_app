@@ -11,6 +11,7 @@ import 'core/theme/app_theme.dart';
 import 'features/user/providers/current_user_provider.dart';
 import 'features/iot_sensing/providers/elelvator_iot/elevator_provider.dart';
 import 'features/iot_sensing/providers/elelvator_iot/pending_nfc_provider.dart';
+import 'features/iot_sensing/presentation/elevator_iot/nfc_trigger_card.dart';
 
 void main() {
   runApp(
@@ -100,7 +101,7 @@ class _EcoSensingAppState extends ConsumerState<EcoSensingApp> {
       title: 'Eco-Sensing 碳排AI智慧核算助理',
       theme: AppTheme.light,
       themeMode: ThemeMode.light,
-      home: const LoginPage(),
+      home: Stack(children: [const LoginPage(), const NfcTriggerCard()]),
     );
   }
 }

@@ -39,6 +39,7 @@ abstract final class AppDecorations {
       end: Alignment.bottomRight,
       colors: [AppColors.gold, const Color(0xFFE0A010)],
     ),
+    borderRadius: BorderRadius.circular(cardRadius),
   );
 
   static BoxDecoration pillChip({
