@@ -5,9 +5,18 @@ import 'package:eco_sensing_app/core/theme/app_decorations.dart';
 
 /// 仿相機對焦框 + 循環掃描線
 class ScanViewfinder extends StatefulWidget {
-  const ScanViewfinder({super.key, this.onTap});
+  const ScanViewfinder({
+    super.key,
+    this.onTap,
+    this.icon = Icons.document_scanner_outlined,
+    this.title = '將單據對準框內',
+    this.subtitle = '點擊開啟相機',
+  });
 
   final VoidCallback? onTap;
+  final IconData icon;
+  final String title;
+  final String subtitle;
 
   @override
   State<ScanViewfinder> createState() => _ScanViewfinderState();
@@ -51,9 +60,7 @@ class _ScanViewfinderState extends State<ScanViewfinder>
               animation: _controller,
               builder: (context, child) {
                 return CustomPaint(
-                  painter: _ViewfinderPainter(
-                    scanProgress: _controller.value,
-                  ),
+                  painter: _ViewfinderPainter(scanProgress: _controller.value),
                   child: child,
                 );
               },
@@ -62,13 +69,13 @@ class _ScanViewfinderState extends State<ScanViewfinder>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.document_scanner_outlined,
+                      widget.icon,
                       size: 40,
                       color: AppColors.starbucksGreen.withValues(alpha: 0.35),
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '將單據對準框內',
+                      widget.title,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: AppColors.starbucksGreen,
                         fontWeight: FontWeight.w600,
@@ -76,7 +83,7 @@ class _ScanViewfinderState extends State<ScanViewfinder>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '點擊開啟相機',
+                      widget.subtitle,
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ],
@@ -131,14 +138,17 @@ class _ViewfinderPainter extends CustomPainter {
 
     final scanY = _inset + (size.height - _inset * 2) * scanProgress;
     final linePaint = Paint()
-      ..shader = LinearGradient(
-        colors: [
-          AppColors.greenAccent.withValues(alpha: 0),
-          AppColors.greenAccent.withValues(alpha: 0.85),
-          AppColors.greenAccent.withValues(alpha: 0),
-        ],
-        stops: const [0, 0.5, 1],
-      ).createShader(Rect.fromLTWH(_inset, scanY - 2, size.width - _inset * 2, 4));
+      ..shader =
+          LinearGradient(
+            colors: [
+              AppColors.greenAccent.withValues(alpha: 0),
+              AppColors.greenAccent.withValues(alpha: 0.85),
+              AppColors.greenAccent.withValues(alpha: 0),
+            ],
+            stops: const [0, 0.5, 1],
+          ).createShader(
+            Rect.fromLTWH(_inset, scanY - 2, size.width - _inset * 2, 4),
+          );
 
     canvas.drawLine(
       Offset(_inset, scanY),
