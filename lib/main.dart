@@ -6,27 +6,33 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/auth/login_screen.dart';
+import 'features/dashboard/presentation/employee/emp_home_screen.dart';
 import 'core/utils/app_observer.dart';
 import 'core/theme/app_theme.dart';
-import 'features/user/providers/current_user_provider.dart';
+import 'core/utils/demo_auth_storage.dart';
 import 'features/iot_sensing/providers/elelvator_iot/elevator_provider.dart';
 import 'features/iot_sensing/providers/elelvator_iot/pending_nfc_provider.dart';
 import 'features/iot_sensing/presentation/elevator_iot/nfc_trigger_card.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final isLoggedIn = await DemoAuthStorage.isLoggedIn();
+
   runApp(
     ProviderScope(
       observers: [AppObserver()],
       child: DevicePreview(
         enabled: !kReleaseMode,
-        builder: (context) => const EcoSensingApp(),
+        builder: (context) => EcoSensingApp(initiallyLoggedIn: isLoggedIn),
       ),
     ),
   );
 }
 
 class EcoSensingApp extends ConsumerStatefulWidget {
-  const EcoSensingApp({super.key});
+  const EcoSensingApp({super.key, required this.initiallyLoggedIn});
+
+  final bool initiallyLoggedIn;
 
   @override
   ConsumerState<EcoSensingApp> createState() => _EcoSensingAppState();
@@ -35,11 +41,13 @@ class EcoSensingApp extends ConsumerStatefulWidget {
 class _EcoSensingAppState extends ConsumerState<EcoSensingApp> {
   final AppLinks _appLinks = AppLinks();
   StreamSubscription? _linkSubscription;
+  late bool _isLoggedIn;
   String _nfcMessage = '尚未掃描 NFC';
 
   @override
   void initState() {
     super.initState();
+    _isLoggedIn = widget.initiallyLoggedIn;
     _initDeepLinks();
   }
 
@@ -48,19 +56,19 @@ class _EcoSensingAppState extends ConsumerState<EcoSensingApp> {
     // 1. 處理 App 處於關閉狀態，因為掃描 NFC 而被冷啟動 (Cold Start)
     _appLinks.getInitialLink().then((Uri? uri) {
       if (uri != null) {
-        _handleNfcUri(uri);
+        unawaited(_handleNfcUri(uri));
       }
     });
 
     // 2. 處理 App 已經在背景運行，因為掃描 NFC 而被喚醒
     _linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
       if (uri != null) {
-        _handleNfcUri(uri);
+        unawaited(_handleNfcUri(uri));
       }
     });
   }
 
-  void _handleNfcUri(Uri uri) {
+  Future<void> _handleNfcUri(Uri uri) async {
     // uri 會長這樣: https://yourdomain.com/app?counter=5
     // 我們可以把 counter 提取出來
     final counterValue = uri.queryParameters['counter'];
@@ -71,15 +79,18 @@ class _EcoSensingAppState extends ConsumerState<EcoSensingApp> {
     _nfcMessage = "成功接收 NFC 資料！\nCounter: $counterValue";
 
     final floor = int.tryParse(counterValue);
+    if (floor == null) {
+      return;
+    }
 
-    final isLoggedIn = ref
-        .read(currentUserProvider)
-        .account
-        .isNotEmpty; // 判斷是否已登入
+    final isLoggedIn = await DemoAuthStorage.isLoggedIn();
+    if (!mounted) {
+      return;
+    }
 
     if (isLoggedIn) {
       // 情況 A：已經登入了！直接紀錄搭電梯
-      ref.read(elevatorProvider.notifier).recordNfcScan(floor!);
+      ref.read(elevatorProvider.notifier).recordNfcScan(floor);
     } else {
       // 情況 B：還沒登入！先把這個樓層「暫存」起來，等他登入再處理
       ref.read(pendingNfcProvider.notifier).state = floor;
@@ -101,7 +112,14 @@ class _EcoSensingAppState extends ConsumerState<EcoSensingApp> {
       title: 'Eco-Sensing 碳排AI智慧核算助理',
       theme: AppTheme.light,
       themeMode: ThemeMode.light,
-      home: Stack(children: [const LoginPage(), const NfcTriggerCard()]),
+      home: Stack(
+        children: [
+          _isLoggedIn
+              ? const EmployeeHomePage()
+              : LoginPage(onLoggedIn: () => setState(() => _isLoggedIn = true)),
+          const NfcTriggerCard(),
+        ],
+      ),
     );
   }
 }

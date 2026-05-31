@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:eco_sensing_app/core/theme/app_colors.dart';
 import 'package:eco_sensing_app/core/theme/app_decorations.dart';
+import 'package:eco_sensing_app/core/utils/demo_auth_storage.dart';
 import 'package:eco_sensing_app/features/auth/login_screen.dart';
 import '../../../../providers/current_user_provider.dart';
 
@@ -97,8 +98,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   ],
                 ),
                 onTap: _showLanguageSheet,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 2,
+                ),
               ),
             ],
           ),
@@ -146,9 +149,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 title: '分享我的碳排檔案',
                 subtitle: '產生分享連結給同事查看',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('分享連結已複製到剪貼簿')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('分享連結已複製到剪貼簿')));
                 },
               ),
               const _SectionDivider(),
@@ -178,11 +181,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 subtitle: '永久刪除您的帳號和所有數據',
                 titleColor: SettingsTab._settingsRed,
                 onTap: () {
-                  _showConfirmDialog(
-                    context,
-                    '刪除帳號',
-                    '此操作無法撤銷，您確定嗎？',
-                  );
+                  _showConfirmDialog(context, '刪除帳號', '此操作無法撤銷，您確定嗎？');
                 },
               ),
             ],
@@ -221,11 +220,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 title: '服務條款',
                 subtitle: '查看服務條款',
                 onTap: () {
-                  _showInfoDialog(
-                    context,
-                    '服務條款',
-                    '使用本應用即表示您同意以下條款...',
-                  );
+                  _showInfoDialog(context, '服務條款', '使用本應用即表示您同意以下條款...');
                 },
               ),
             ],
@@ -277,15 +272,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     return ListTile(
       title: Text(
         title,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(
         subtitle,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
       ),
       trailing: Icon(
         Icons.lock_outline,
@@ -318,9 +313,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       subtitle: showSubtitle && subtitle != null
           ? Text(
               subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
             )
           : null,
       trailing: Icon(
@@ -344,15 +339,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       leading: Icon(icon, color: iconColor, size: 22),
       title: Text(
         title,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(
         subtitle,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
       ),
       trailing: Switch(
         value: value,
@@ -410,20 +405,26 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
   }
 
   void _confirmLogout(BuildContext context) {
+    final rootContext = context;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('登出'),
         content: const Text('確定要登出嗎？'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('取消'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.of(context).pushAndRemoveUntil(
+            onPressed: () async {
+              await DemoAuthStorage.logout();
+              if (!rootContext.mounted) {
+                return;
+              }
+              Navigator.pop(dialogContext);
+              Navigator.of(rootContext).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => const LoginPage()),
                 (route) => false,
               );
@@ -487,10 +488,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 }
 
 class _SettingsBlock extends StatelessWidget {
-  const _SettingsBlock({
-    required this.title,
-    required this.children,
-  });
+  const _SettingsBlock({required this.title, required this.children});
 
   final String title;
   final List<Widget> children;
@@ -502,10 +500,7 @@ class _SettingsBlock extends StatelessWidget {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(
-          color: SettingsTab._cardBorder,
-          width: 0.5,
-        ),
+        side: const BorderSide(color: SettingsTab._cardBorder, width: 0.5),
       ),
       color: AppColors.white,
       child: Column(

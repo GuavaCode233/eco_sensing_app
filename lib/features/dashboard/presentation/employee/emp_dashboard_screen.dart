@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:eco_sensing_app/core/theme/app_colors.dart';
 import 'package:eco_sensing_app/core/theme/app_decorations.dart';
+import 'package:eco_sensing_app/core/utils/demo_auth_storage.dart';
 import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/experience_bar_card.dart';
 import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/carbon_composiotion_card.dart';
 import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/dashboard_header.dart';
@@ -72,7 +73,11 @@ class DashboardPage extends ConsumerWidget {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await DemoAuthStorage.logout();
+                          if (!context.mounted) {
+                            return;
+                          }
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
                               builder: (context) => const LoginPage(),
@@ -83,7 +88,9 @@ class DashboardPage extends ConsumerWidget {
                         child: const Text('登出'),
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+                    SizedBox(
+                      height: MediaQuery.of(context).padding.bottom + 16,
+                    ),
                   ],
                 ),
               ),

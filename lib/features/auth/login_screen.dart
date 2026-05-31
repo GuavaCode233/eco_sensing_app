@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+import 'package:eco_sensing_app/core/utils/demo_auth_storage.dart';
 import 'package:eco_sensing_app/core/theme/app_colors.dart';
 import 'package:eco_sensing_app/core/theme/app_decorations.dart';
 import '../dashboard/presentation/employee/emp_home_screen.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key, this.onLoggedIn});
+
+  final VoidCallback? onLoggedIn;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -24,20 +27,26 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _handleLogin() {
-    if (_emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _selectedRole == null) {
+  Future<void> _handleLogin() async {
+    if (_selectedRole == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('請填寫所有欄位')));
+      ).showSnackBar(const SnackBar(content: Text('請選擇身份')));
       return;
     }
 
     if (_selectedRole == '員工端') {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => EmployeeHomePage()),
-      );
+      await DemoAuthStorage.setLoggedIn(true);
+      if (!mounted) {
+        return;
+      }
+
+      widget.onLoggedIn?.call();
+      if (widget.onLoggedIn == null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const EmployeeHomePage()),
+        );
+      }
     } else {
       ScaffoldMessenger.of(
         context,
@@ -94,10 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    Text(
-                      '選擇身份',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
+                    Text('選擇身份', style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -105,8 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: _buildRoleButton(
                             role: '員工端',
                             isSelected: _selectedRole == '員工端',
-                            onTap: () =>
-                                setState(() => _selectedRole = '員工端'),
+                            onTap: () => setState(() => _selectedRole = '員工端'),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -114,17 +119,13 @@ class _LoginPageState extends State<LoginPage> {
                           child: _buildRoleButton(
                             role: '企業端',
                             isSelected: _selectedRole == '企業端',
-                            onTap: () =>
-                                setState(() => _selectedRole = '企業端'),
+                            onTap: () => setState(() => _selectedRole = '企業端'),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      '郵箱地址',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
+                    Text('郵箱地址', style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _emailController,
@@ -135,10 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text(
-                      '密碼',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
+                    Text('密碼', style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _passwordController,
