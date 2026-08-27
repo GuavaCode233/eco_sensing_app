@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:eco_sensing_app/core/theme/app_colors.dart';
 import 'package:eco_sensing_app/core/theme/app_decorations.dart';
-import 'package:eco_sensing_app/core/utils/demo_auth_storage.dart';
+import 'package:eco_sensing_app/core/utils/auth_storage.dart';
 import 'package:eco_sensing_app/features/auth/login_screen.dart';
 import '../../../../providers/current_user_provider.dart';
 
@@ -419,7 +419,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           ),
           TextButton(
             onPressed: () async {
-              await DemoAuthStorage.logout();
+              await AuthStorage.logout();
               if (!rootContext.mounted) {
                 return;
               }

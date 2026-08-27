@@ -9,14 +9,14 @@ import 'features/auth/login_screen.dart';
 import 'features/dashboard/presentation/employee/emp_home_screen.dart';
 import 'core/utils/app_observer.dart';
 import 'core/theme/app_theme.dart';
-import 'core/utils/demo_auth_storage.dart';
+import 'core/utils/auth_storage.dart';
 import 'features/iot_sensing/providers/elelvator_iot/elevator_provider.dart';
 import 'features/iot_sensing/providers/elelvator_iot/pending_nfc_provider.dart';
 import 'features/iot_sensing/presentation/elevator_iot/nfc_trigger_card.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final isLoggedIn = await DemoAuthStorage.isLoggedIn();
+  final isLoggedIn = await AuthStorage.isLoggedIn();
 
   runApp(
     ProviderScope(
@@ -83,7 +83,7 @@ class _EcoSensingAppState extends ConsumerState<EcoSensingApp> {
       return;
     }
 
-    final isLoggedIn = await DemoAuthStorage.isLoggedIn();
+    final isLoggedIn = await AuthStorage.isLoggedIn();
     if (!mounted) {
       return;
     }

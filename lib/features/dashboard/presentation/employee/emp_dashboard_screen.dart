@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:eco_sensing_app/core/theme/app_colors.dart';
 import 'package:eco_sensing_app/core/theme/app_decorations.dart';
-import 'package:eco_sensing_app/core/utils/demo_auth_storage.dart';
+import 'package:eco_sensing_app/core/utils/auth_storage.dart';
 import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/experience_bar_card.dart';
 import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/carbon_composiotion_card.dart';
 import 'package:eco_sensing_app/features/dashboard/presentation/employee/widgets/dashboard_header.dart';
@@ -74,7 +74,7 @@ class DashboardPage extends ConsumerWidget {
                       width: double.infinity,
                       child: OutlinedButton(
                         onPressed: () async {
-                          await DemoAuthStorage.logout();
+                          await AuthStorage.logout();
                           if (!context.mounted) {
                             return;
                           }
