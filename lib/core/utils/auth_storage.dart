@@ -1,14 +1,15 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 憑證儲存。
 ///
-/// A1 範圍：Refresh Token 暫存於 `SharedPreferences`；Access Token 僅存於
-/// 記憶體、不落地。A2（§3.2）將把 Refresh Token 改存 `flutter_secure_storage`，
-/// 屆時只需替換本檔的儲存後端，呼叫端介面不變。
+/// Refresh Token 存 `flutter_secure_storage`（Android Keystore / iOS
+/// Keychain，§3.2）；Access Token 僅存於記憶體、不落地。
 class AuthStorage {
   const AuthStorage._();
 
   static const _refreshTokenKey = 'app_refresh_token';
+  static const _secureStorage = FlutterSecureStorage();
 
   static String? _accessToken;
 
@@ -19,13 +20,11 @@ class AuthStorage {
     required String refreshToken,
   }) async {
     _accessToken = accessToken;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_refreshTokenKey, refreshToken);
+    await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
   }
 
-  static Future<String?> getRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_refreshTokenKey);
+  static Future<String?> getRefreshToken() {
+    return _secureStorage.read(key: _refreshTokenKey);
   }
 
   /// 「已登入」= 持有 Refresh Token。有效性判定權在後端（§3.4），
@@ -37,6 +36,8 @@ class AuthStorage {
 
   static Future<void> logout() async {
     _accessToken = null;
+    await _secureStorage.delete(key: _refreshTokenKey);
+    // A1 階段曾暫存於 SharedPreferences；順手清除舊裝置上的殘留值。
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_refreshTokenKey);
   }
