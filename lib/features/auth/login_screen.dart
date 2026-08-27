@@ -88,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(builder: (context) => const EmployeeHomePage()),
         );
       }
-    } on AuthException catch (e) {
+    } on AuthApiException catch (e) {
       if (!mounted) {
         return;
       }

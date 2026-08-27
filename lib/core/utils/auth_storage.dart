@@ -23,6 +23,11 @@ class AuthStorage {
     await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
   }
 
+  /// 冷啟動 / 401 續期換發成功後更新 Access Token；Refresh 不變（不輪換）。
+  static void saveAccessToken(String accessToken) {
+    _accessToken = accessToken;
+  }
+
   static Future<String?> getRefreshToken() {
     return _secureStorage.read(key: _refreshTokenKey);
   }

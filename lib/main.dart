@@ -6,6 +6,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/auth/login_screen.dart';
+import 'features/auth/data/auth_bootstrapper.dart';
 import 'features/dashboard/presentation/employee/emp_home_screen.dart';
 import 'core/utils/app_observer.dart';
 import 'core/theme/app_theme.dart';
@@ -16,7 +17,10 @@ import 'features/iot_sensing/presentation/elevator_iot/nfc_trigger_card.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final isLoggedIn = await AuthStorage.isLoggedIn();
+  // 冷啟動靜默續期（§3.3）：有 Refresh 就背景換發 Access，員工無感；
+  // 無網路時仍放行進 App 看快取，只有明確被拒（過期/撤銷）才導向登入頁。
+  final bootstrapStatus = await const AuthBootstrapper().run();
+  final isLoggedIn = bootstrapStatus != BootstrapStatus.loggedOut;
 
   runApp(
     ProviderScope(
