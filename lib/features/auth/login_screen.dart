@@ -15,10 +15,29 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _selectedRole;
   bool _obscurePassword = true;
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return '請輸入郵箱';
+    }
+    final emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailPattern.hasMatch(value.trim())) {
+      return '請輸入有效的郵箱地址';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return '請輸入密碼';
+    }
+    return null;
+  }
 
   @override
   void dispose() {
@@ -32,6 +51,10 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('請選擇身份')));
+      return;
+    }
+
+    if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
 
@@ -67,7 +90,10 @@ class _LoginPageState extends State<LoginPage> {
               child: Container(
                 decoration: AppDecorations.card(),
                 padding: const EdgeInsets.all(32),
-                child: Column(
+                child: Form(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -127,9 +153,10 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 24),
                     Text('郵箱地址', style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 8),
-                    TextField(
+                    TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
+                      validator: _validateEmail,
                       decoration: const InputDecoration(
                         hintText: '請輸入郵箱',
                         prefixIcon: Icon(Icons.email_outlined),
@@ -138,9 +165,10 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20),
                     Text('密碼', style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 8),
-                    TextField(
+                    TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
+                      validator: _validatePassword,
                       decoration: InputDecoration(
                         hintText: '請輸入密碼',
                         prefixIcon: const Icon(Icons.lock_outline),
@@ -171,6 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: const Text('忘記密碼？'),
                     ),
                   ],
+                  ),
                 ),
               ),
             ),
