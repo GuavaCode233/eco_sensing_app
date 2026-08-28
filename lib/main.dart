@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/auth/login_screen.dart';
 import 'features/auth/data/auth_bootstrapper.dart';
+import 'features/auth/session_controller.dart';
 import 'features/dashboard/presentation/employee/emp_home_screen.dart';
 import 'core/utils/app_observer.dart';
 import 'core/theme/app_theme.dart';
@@ -110,6 +111,14 @@ class _EcoSensingAppState extends ConsumerState<EcoSensingApp> {
 
   @override
   Widget build(BuildContext context) {
+    // 401 續期攔截器（ApiClient）換發也被拒絕時會遞增此計數器（§3.4）；
+    // 不論觸發自哪個畫面的哪次請求，都在這裡統一收斂為導向登入頁。
+    ref.listen<int>(forcedLogoutProvider, (previous, next) {
+      if (previous != null && next != previous && _isLoggedIn) {
+        setState(() => _isLoggedIn = false);
+      }
+    });
+
     return MaterialApp(
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
