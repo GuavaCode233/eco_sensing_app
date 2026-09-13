@@ -58,7 +58,9 @@ class ApiClient {
   }) async {
     final response = await _dispatch(method, path, body: body);
 
-    if (response.statusCode != 401 || isRetry) {
+    if (AuthStorage.isDevelopmentSession ||
+        response.statusCode != 401 ||
+        isRetry) {
       return response;
     }
 
@@ -80,7 +82,9 @@ class ApiClient {
     Object? body,
   }) async {
     final uri = Uri.parse('${AppConfig.apiBaseUrl}$path');
-    final accessToken = AuthStorage.accessToken;
+    final accessToken = AuthStorage.isDevelopmentSession
+        ? null
+        : AuthStorage.accessToken;
     final request = http.Request(method, uri)
       ..headers['Content-Type'] = 'application/json'
       ..headers.addAll(

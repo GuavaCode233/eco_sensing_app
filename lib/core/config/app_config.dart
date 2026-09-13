@@ -11,6 +11,6 @@ class AppConfig {
 
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://127.0.0.1:7860',
+    defaultValue: 'https://uie47061-eco-sensing-backend.hf.space',
   );
 }

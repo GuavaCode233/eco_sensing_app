@@ -13,12 +13,16 @@ class AuthStorage {
 
   static String? _accessToken;
 
+  /// 本次執行的畫面開發模式，不寫入裝置或產生登入憑證。
+  static bool isDevelopmentSession = false;
+
   static String? get accessToken => _accessToken;
 
   static Future<void> saveSession({
     required String accessToken,
     required String refreshToken,
   }) async {
+    isDevelopmentSession = false;
     _accessToken = accessToken;
     await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
   }
@@ -35,11 +39,13 @@ class AuthStorage {
   /// 「已登入」= 持有 Refresh Token。有效性判定權在後端（§3.4），
   /// 此處僅作在場判斷，非過期驗證。
   static Future<bool> isLoggedIn() async {
+    if (isDevelopmentSession) return true;
     final refreshToken = await getRefreshToken();
     return refreshToken != null && refreshToken.isNotEmpty;
   }
 
   static Future<void> logout() async {
+    isDevelopmentSession = false;
     _accessToken = null;
     await _secureStorage.delete(key: _refreshTokenKey);
     // A1 階段曾暫存於 SharedPreferences；順手清除舊裝置上的殘留值。

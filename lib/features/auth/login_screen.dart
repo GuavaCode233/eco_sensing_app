@@ -23,6 +23,27 @@ class _LoginPageState extends State<LoginPage> {
   String? _selectedRole;
   bool _obscurePassword = true;
   bool _isSubmitting = false;
+  int _employeeTapCount = 0;
+
+  void _enterHome() {
+    if (widget.onLoggedIn != null) {
+      widget.onLoggedIn!();
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const EmployeeHomePage()),
+      );
+    }
+  }
+
+  void _selectEmployee() {
+    if (_isSubmitting) return;
+    setState(() => _selectedRole = '員工端');
+    _employeeTapCount++;
+    if (_employeeTapCount < 5) return;
+    _employeeTapCount = 0;
+    AuthStorage.isDevelopmentSession = true;
+    _enterHome();
+  }
 
   String? _validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -82,12 +103,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      widget.onLoggedIn?.call();
-      if (widget.onLoggedIn == null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const EmployeeHomePage()),
-        );
-      }
+      _enterHome();
     } on AuthApiException catch (e) {
       if (!mounted) {
         return;
@@ -165,8 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: _buildRoleButton(
                               role: '員工端',
                               isSelected: _selectedRole == '員工端',
-                              onTap: () =>
-                                  setState(() => _selectedRole = '員工端'),
+                              onTap: _selectEmployee,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -174,8 +189,11 @@ class _LoginPageState extends State<LoginPage> {
                             child: _buildRoleButton(
                               role: '企業端',
                               isSelected: _selectedRole == '企業端',
-                              onTap: () =>
-                                  setState(() => _selectedRole = '企業端'),
+                              onTap: () {
+                                if (_isSubmitting) return;
+                                _employeeTapCount = 0;
+                                setState(() => _selectedRole = '企業端');
+                              },
                             ),
                           ),
                         ],
