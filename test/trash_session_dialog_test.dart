@@ -66,6 +66,37 @@ Future<void> showSession(WidgetTester tester, FakeTrashRepository repo) async {
 }
 
 void main() {
+  testWidgets('small screen and large text fit every status', (tester) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final repo = FakeTrashRepository();
+    await showSession(tester, repo);
+    for (final status in [
+      'waiting',
+      'preparing',
+      'ready',
+      'recognizing',
+      'uploading',
+      'calculating',
+      'completed',
+      'failed',
+    ]) {
+      repo.emit(status);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: status);
+      if (status == 'failed') {
+        expect(find.byKey(const ValueKey('trash-step-4')), findsNothing);
+        expect(find.text('處理失敗'), findsOneWidget);
+      } else {
+        expect(find.byKey(const ValueKey('trash-step-4')), findsOneWidget);
+      }
+    }
+  });
+
   testWidgets(
     'renders only this session, all statuses and exact result values',
     (tester) async {
@@ -77,9 +108,11 @@ void main() {
       await tester.pump();
       expect(find.text('分析完成'), findsNothing);
       for (final entry in {
-        'opened': '垃圾桶已開啟',
-        'collecting': '正在收集垃圾資料...',
-        'processing': '正在分析垃圾...',
+        'preparing': '垃圾桶準備中...',
+        'ready': '請投入垃圾',
+        'recognizing': '正在辨識垃圾...',
+        'uploading': '正在傳送感測資料...',
+        'calculating': '正在計算重量與碳排...',
         'failed': '處理失敗',
         'completed': '分析完成',
       }.entries) {
@@ -88,8 +121,8 @@ void main() {
         expect(find.text(entry.value), findsOneWidget);
       }
       expect(find.text('垃圾類型：PET'), findsOneWidget);
-      expect(find.text('重量：32.5'), findsOneWidget);
-      expect(find.text('碳排：0.083'), findsOneWidget);
+      expect(find.text('重量：32.5 g'), findsOneWidget);
+      expect(find.text('碳排：0.083 kgCO₂e'), findsOneWidget);
       await tester.tap(find.text('關閉'));
       await tester.pumpAndSettle();
       expect(repo.cancellations, 1);
@@ -110,7 +143,7 @@ void main() {
       expect(repo.creates, 1);
       expect(repo.cancellations, 1);
       expect(repo.watches.length, 2);
-      repo.emit('processing');
+      repo.emit('calculating');
       await tester.pump();
       expect(find.text('即時連線中斷，請重新連線。'), findsNothing);
       final context = tester.element(find.byType(TrashSessionDialog));

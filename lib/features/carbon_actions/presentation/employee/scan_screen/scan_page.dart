@@ -86,7 +86,7 @@ class _ScanPageState extends State<ScanPage> {
         builder: (dialogContext) => _WasteCameraScanOverlay(
           onClose: () => Navigator.of(dialogContext).pop(false),
           onCameraReady: () {
-            _scanTimer = Timer(const Duration(seconds: 3), () {
+            _scanTimer = Timer(const Duration(milliseconds: 1500), () {
               if (mounted &&
                   dialogContext.mounted &&
                   ModalRoute.of(dialogContext)?.isCurrent == true) {
