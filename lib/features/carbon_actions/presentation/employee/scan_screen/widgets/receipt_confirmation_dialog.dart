@@ -44,7 +44,6 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
   late TextEditingController _destinationController;
   late TextEditingController _distanceController;
   late TextEditingController _totalFeeController;
-  late TextEditingController _actualCarbonController;
   late String _selectedReceiptType;
   late DateTime _selectedDate;
 
@@ -68,9 +67,6 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
     _totalFeeController = TextEditingController(
       text: widget.totalFee.toStringAsFixed(2),
     );
-    _actualCarbonController = TextEditingController(
-      text: widget.actualCarbonFootprint?.toStringAsFixed(2) ?? '',
-    );
     _selectedReceiptType = widget.receiptType;
     _selectedDate = widget.receiptDate;
   }
@@ -81,7 +77,6 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
     _destinationController.dispose();
     _distanceController.dispose();
     _totalFeeController.dispose();
-    _actualCarbonController.dispose();
     super.dispose();
   }
 
@@ -123,9 +118,7 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
           ? null
           : double.tryParse(_distanceController.text),
       'totalFee': double.tryParse(_totalFeeController.text) ?? widget.totalFee,
-      'actualCarbon': _actualCarbonController.text.isEmpty
-          ? null
-          : double.tryParse(_actualCarbonController.text),
+      'actualCarbon': widget.actualCarbonFootprint,
       'estimatedCarbon': widget.estimatedCarbonFootprint,
       'experience': widget.experienceGain,
       'coin': widget.coinGain,
@@ -213,15 +206,16 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
               const Divider(color: AppColors.ceramic, height: 1),
               const SizedBox(height: 20),
 
-              // 碳足跡
+              // 碳足跡（後端計算，唯讀）
               _buildSectionLabel('碳足跡'),
               const SizedBox(height: 8),
-              _buildTextField(
-                controller: _actualCarbonController,
-                hintText: '輸入實際碳足跡',
-                keyboardType: TextInputType.number,
-                suffixText: 'kg CO₂e',
-                // TODO: 驗證邏輯（正數、2位小數）
+              Text(
+                widget.actualCarbonFootprint != null
+                    ? '${widget.actualCarbonFootprint!.toStringAsFixed(2)} kg CO₂e'
+                    : '尚未計算',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               Text(
