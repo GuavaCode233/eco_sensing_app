@@ -8,7 +8,6 @@
 | 訖站 | `_destinationController` | `String` | 可編輯（文字輸入框） | hint「輸入訖站地址」 |
 | 里程 | `_distanceController` | `double?` | 可編輯（數字輸入框） | 單位 km；顯示 TDX／Google Maps 換算結果，換算失敗（degraded）時作為人工輸入 fallback |
 | 金額 | `_totalFeeController` | `double` | 可編輯（數字輸入框） | 單位 NT$ |
-| 碳足跡（實際） | `widget.actualCarbonFootprint` | `double?` | 唯讀 | 全由後端計算；為 null 時顯示「尚未計算」 |
-| 碳足跡（預估） | `widget.estimatedCarbonFootprint` | `double` | 唯讀 | 顯示於實際碳足跡下方作為參考 |
+| 碳足跡（預估） | `widget.estimatedCarbonFootprint` | `double` | 唯讀 | 顯示後端計算結果的 preview |
 | 預估獎勵 - 經驗值 | `widget.experienceGain` | `int` | 唯讀 | 顯示格式 `{值} Exp` |
 | 預估獎勵 - 碳幣 | `widget.coinGain` | `int` | 唯讀 | 顯示格式 `{值} 碳幣` |

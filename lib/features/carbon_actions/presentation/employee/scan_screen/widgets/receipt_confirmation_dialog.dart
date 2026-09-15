@@ -11,7 +11,6 @@ class ReceiptConfirmationDialog extends StatefulWidget {
   final String destinationLocation;
   final double? distanceKm;
   final double totalFee;
-  final double? actualCarbonFootprint;
   final double estimatedCarbonFootprint;
   final int experienceGain;
   final int coinGain;
@@ -26,7 +25,6 @@ class ReceiptConfirmationDialog extends StatefulWidget {
     required this.destinationLocation,
     required this.distanceKm,
     required this.totalFee,
-    required this.actualCarbonFootprint,
     required this.estimatedCarbonFootprint,
     required this.experienceGain,
     required this.coinGain,
@@ -118,7 +116,6 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
           ? null
           : double.tryParse(_distanceController.text),
       'totalFee': double.tryParse(_totalFeeController.text) ?? widget.totalFee,
-      'actualCarbon': widget.actualCarbonFootprint,
       'estimatedCarbon': widget.estimatedCarbonFootprint,
       'experience': widget.experienceGain,
       'coin': widget.coinGain,
@@ -206,23 +203,14 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
               const Divider(color: AppColors.ceramic, height: 1),
               const SizedBox(height: 20),
 
-              // 碳足跡（後端計算，唯讀）
-              _buildSectionLabel('碳足跡'),
+              // 碳足跡（預估，後端計算，唯讀）
+              _buildSectionLabel('碳足跡（預估）'),
               const SizedBox(height: 8),
               Text(
-                widget.actualCarbonFootprint != null
-                    ? '${widget.actualCarbonFootprint!.toStringAsFixed(2)} kg CO₂e'
-                    : '尚未計算',
+                '${widget.estimatedCarbonFootprint.toStringAsFixed(1)} kg CO₂e',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '預估碳足跡: ${widget.estimatedCarbonFootprint.toStringAsFixed(1)} kg CO₂e',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 20),
               const Divider(color: AppColors.ceramic, height: 1),
