@@ -9,6 +9,7 @@ class ReceiptConfirmationDialog extends StatefulWidget {
   final DateTime receiptDate;
   final String originLocation;
   final String destinationLocation;
+  final double? distanceKm;
   final double totalFee;
   final double? actualCarbonFootprint;
   final double estimatedCarbonFootprint;
@@ -23,6 +24,7 @@ class ReceiptConfirmationDialog extends StatefulWidget {
     required this.receiptDate,
     required this.originLocation,
     required this.destinationLocation,
+    required this.distanceKm,
     required this.totalFee,
     required this.actualCarbonFootprint,
     required this.estimatedCarbonFootprint,
@@ -40,6 +42,7 @@ class ReceiptConfirmationDialog extends StatefulWidget {
 class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
   late TextEditingController _originController;
   late TextEditingController _destinationController;
+  late TextEditingController _distanceController;
   late TextEditingController _totalFeeController;
   late TextEditingController _actualCarbonController;
   late String _selectedReceiptType;
@@ -59,6 +62,9 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
     _destinationController = TextEditingController(
       text: widget.destinationLocation,
     );
+    _distanceController = TextEditingController(
+      text: widget.distanceKm?.toStringAsFixed(2) ?? '',
+    );
     _totalFeeController = TextEditingController(
       text: widget.totalFee.toStringAsFixed(2),
     );
@@ -73,6 +79,7 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
   void dispose() {
     _originController.dispose();
     _destinationController.dispose();
+    _distanceController.dispose();
     _totalFeeController.dispose();
     _actualCarbonController.dispose();
     super.dispose();
@@ -112,6 +119,9 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
       'date': _selectedDate,
       'origin': _originController.text,
       'destination': _destinationController.text,
+      'distanceKm': _distanceController.text.isEmpty
+          ? null
+          : double.tryParse(_distanceController.text),
       'totalFee': double.tryParse(_totalFeeController.text) ?? widget.totalFee,
       'actualCarbon': _actualCarbonController.text.isEmpty
           ? null
@@ -169,6 +179,21 @@ class _ReceiptConfirmationDialogState extends State<ReceiptConfirmationDialog> {
                 controller: _destinationController,
                 hintText: '輸入訖站地址',
                 // TODO: 後續實裝地址自動完成選擇
+              ),
+              const SizedBox(height: 20),
+              const Divider(color: AppColors.ceramic, height: 1),
+              const SizedBox(height: 20),
+
+              // 里程（TDX／Google Maps 換算，換算失敗時作為人工輸入 fallback）
+              _buildSectionLabel('里程'),
+              const SizedBox(height: 8),
+              _buildTextField(
+                controller: _distanceController,
+                hintText: widget.distanceKm == null
+                    ? 'TDX／Google Maps 無法換算，請手動輸入里程'
+                    : '輸入里程',
+                keyboardType: TextInputType.number,
+                suffixText: 'km',
               ),
               const SizedBox(height: 20),
               const Divider(color: AppColors.ceramic, height: 1),
