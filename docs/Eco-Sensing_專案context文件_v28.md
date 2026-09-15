@@ -22,10 +22,10 @@
 
 | 模組／層面 | 現行定案 | 詳見 |
 |-----------|----------|------|
-| 差旅核算 | 三軌上傳（高鐵票／計程車紙本／App 截圖），OCR＋GPT-4o NER，員工確認後送出 | 4.1 |
+| 差旅核算 | 三軌上傳（高鐵票／計程車紙本／App 截圖）；OCR＋GPT-4o NER **皆跑後端**、App 純上傳入口；後端確認前算好里程／碳排 → App 顯示稽核清單供人工編輯 → 送出前以最終值重算一次 → 入庫；里程/碳排試算走 `POST /api/travel-records/preview`（不落庫、需 Bearer、degraded 降級）；LLM 中斷 fallback（NER 失效退空表單、OCR 亦失效退全手動）；來源記三態 `entry_source`（`ai`／`ai_edited`／`manual`） | 4.1 |
 | 廢棄物 | 員工掃桶上 QR 開 session → 投入 → App 點投入完畢；樹莓派匿名上傳、後端配對歸戶（A＋C＋D＋G 組合） | 4.2 |
 | 電梯 | 感測端採**被動 NFC tag**（各樓層電梯廳，不供電／不接觸電梯控制系統，主動式 ESP32 降級為未來增強路徑，[D5]）；手機掃描進出樓層、HTTPS 直送後端（不經 MQTT）；共乘採方案 B 固定單人分攤值（樓層差 × 上/下行單人係數，不感測人數、不拆總耗電），激勵帳與盤查帳分離 | 4.3 |
-| Eco-Agent | Go 開發；方案 B 手機掃碼綁定＋雙 token；本地持久化佇列＋四重觸發上傳；集中配置參數已定案（4.4.4）；電腦路徑改使用率加權、Agent 純感測後端計算（4.4 [D7]）；雲端儲存量取 `usageInDrive`、`usageInDriveTrash` 拆作激勵任務（4.4 [D8]）；雲端 PUE 採 Google fleet-wide 均值、每GB儲存能耗強度以硬碟規格反推（4.4 [D9]，係數值待查證）；路徑 C 應用場景四類盤點、趨勢/教育可放心做、讀檔案清單類待隱私決策（4.4 [D10]）；印表機 SNMP 五參數隨綁定本地設定、不走全域下發（4.4.2、[D11]）；`DIGITAL_USAGE` 採一路徑一列、`path_type` 由 Agent 明送（[D12]，ERD 已補 `path_type`／`drive_trash_gb`）；**三路徑全改 HTTPS、Agent 不再連 MQTT Broker**（[D13]）；冪等去重定案——`collected_at` 勝出規則、鍵粒度依路徑分三組（電腦 per-device／印表機 per-printer／雲端 per-account）（[D14]，ERD 已補 `device_id`／`collected_at`／`printer_serial`／`DEVICE.display_name`）；**印表機路徑改送 SNMP 累計讀數、差分移至後端**（[D15]，ERD 已補 `printer_page_counter`） | 4.4 |
+| Eco-Agent | Go 開發；方案 B 手機掃碼綁定＋雙 token；本地持久化佇列＋四重觸發上傳；集中配置參數已定案（4.4.4）；電腦路徑改使用率加權、Agent 純感測後端計算（4.4 [D7]）；雲端儲存量取 `usageInDrive`、`usageInDriveTrash` 拆作激勵任務（4.4 [D8]）；雲端 PUE 採 Google fleet-wide 均值、每GB儲存能耗強度以硬碟規格反推（4.4 [D9]，係數值待查證）；路徑 C 應用場景四類盤點、趨勢/教育可放心做、讀檔案清單類待隱私決策（4.4 [D10]）；印表機 SNMP 五參數隨綁定本地設定、不走全域下發（4.4.2、[D11]）；`DIGITAL_USAGE` 採一路徑一列、`path_type` 由 Agent 明送（[D12]，ERD 已補 `path_type`／`drive_trash_gb`）；**三路徑全改 HTTPS、Agent 不再連 MQTT Broker**（[D13]）；冪等去重定案——`collected_at` 勝出規則、鍵粒度依路徑分三組（電腦 per-device／印表機 per-printer／雲端 per-account）（[D14]，ERD 已補 `device_id`／`collected_at`／`printer_serial`／`DEVICE.display_name`）；**印表機路徑改送 SNMP 累計讀數、差分移至後端**（[D15]，ERD 已補 `printer_page_counter`）；**[D14] 缺口二與 [D15] 已於 Eco-Agent 程式碼落地**——`printer_serial` 依三候選 OID 依序讀取、查無時省略該欄位（不阻擋 `printer_page_counter` 入列），`printer_page_counter` 一律原樣送出、不在本機相減；`device_uuid`（4.4.2）亦已實作，首次呼叫時產生 UUID v4 並持久化於佇列 state 表 | 4.4 |
 | 印表機歸戶 | 優先開發「個人專屬機（Eco-Agent SNMP 輪詢歸戶）」與「手動上傳用紙量（App 主動感測、須搭誘因）」；共用機的 Print Server Log 與 Pull Printing API 列為可行、待實作測試；**歸鍵以印表機序號（`printer_serial`）而非 `device_id`**，防同一台印表機被兩台裝置重複計算（[D14]）；**手動上傳用紙量落地定案（[D16]）**——走 `POST /api/digital-usages`（App 員工 `Bearer`、PostgREST，非 Agent 的 `agent/digital-usage/batch`）、以新欄位 `sensing_mode`（`auto`／`manual`）區分自動與手動、App 端彙總後端一天一列、兩管道互斥（專屬機走自動／共用機走手動，無雙重計算） | 4.4、7 |
 | 綁定碼儲存 | 後端 `BINDING_CODE` 表持久化短效一次性碼（5 分鐘 TTL、消費即失效、過期即失效） | 4.4.2 |
 | QR 辨識 | 全系統統一 custom scheme URI；掃描一律開/用 App，App 依 URI host/path 分流動作 | 4.5 |
@@ -106,13 +106,30 @@
 | B | 計程車紙本 | 人工補填 | OCR 取金額 → 員工手填起訖點 → Google Maps 換算里程 |
 | C | App 乘車截圖 | 半自動 | OCR 取起訖/距離 → GPT-4o 辨識工具 → Google Maps 補算里程 |
 
+- **OCR／NER 端點定位**：OpenCV 前處理、Tesseract OCR、GPT-4o NER **皆跑於後端**；App 掃描頁僅為「拍照／選圖上傳入口」，不在端上辨識（辨識依賴 GPT-4o、TDX、Google Maps 與後端係數庫，集中於後端一致）。整條流程為 **App 拍照上傳 → 後端 OCR＋NER → App 顯示稽核清單 → 員工確認 → 後端入庫**。
 - **GPT-4o NER 輸出**：固定 JSON Schema（origin / destination / transport_mode / date / amount），避免自由格式。
 - **排放係數**：高鐵 32 gCO₂e/人公里（環保署認證）；計程車與其他交通依環保署/IPCC 係數；係數庫後端維護、不寫死於前端。
-- **確認流程**：三軌計算完成後顯示「完整記錄確認畫面」，員工確認後送出，數據綁定報銷單據 ID。
+- **稽核確認流程（現行定案）**：三軌辨識完成後，後端**於確認前先算好里程（TDX／Maps）與碳排**，隨結構化欄位一併回傳，App 顯示「完整記錄確認畫面」供員工**人工稽核**。員工可編輯任一欄位（票據類型／日期／起訖／工具／金額／碳足跡）；**改動起訖點或交通工具時，里程與碳排不即時重算，於員工按下確認送出前由後端以最終值重算一次**（省 API、與入庫同一時點）。員工確認後才送出、入庫，數據綁定報銷單據 ID。
+- **語言模型中斷 fallback（現行定案）**：確認清單同時服務兩種資料狀態，UI 一套、資料流兩態——
+  - **GPT-4o NER 中斷、OCR 成功**：後端回傳原始 OCR 文字＋空白／半填欄位，清單退化為「未辨識，請手動補填」，員工於確認畫面補齊；里程與係數計算路徑**不變**（仍走 TDX／Maps＋後端係數庫），僅 NER 段由人力取代。
+  - **Tesseract OCR 亦中斷**：退回全手動輸入（等同軌道 B 計程車紙本的人工補填路徑）。
+- **來源標記（`entry_source`，三態）**：每筆 `TRAVEL_RECORD` 落庫時記 `entry_source` ∈ `ai`（AI 預填、員工未改）／`ai_edited`（AI 預填但員工修正過）／`manual`（fallback 全手動補填），供日後回溯 NER 準確率。入庫值一律以**員工確認畫面上的最終值為準**（人改過即存改後值，並記為 `ai_edited`）。此欄與 §4.4 `sensing_mode`（auto/manual）為同一「來源方式明確標記、不靠事後推斷」取向，惟差旅有「AI 填了但人改過」的中間態，故用三值而非兩值。
 
 #### 決策記錄（脈絡與依據）
 
 - **[D1] 為何採「手動上傳照片/截圖」而非直接串接乘車 App**：原考慮直接串接 App 碳排量，但實際可直接串的僅 Uber for Business，故統一改採「手動上傳照片/截圖」做分析。
+- **[D2] 稽核清單、LLM 中斷 fallback、里程重算時機與三態來源標記（v27 定案）**：
+  - **(1) OCR／NER 落後端、App 純上傳入口**：辨識鏈接 GPT-4o NER、TDX 里程、後端係數庫，若在 App 端辨識反需把後續依賴搬上端或多一次往返；與 §4.2「樹莓派純感測、計算歸後端」、[A3]「`employee_id` 由憑證解出、前端只帶業務參數」同一原則。若日後要端上即時預覽，另以 ML Kit 做輕量草稿、後端仍為正式核算（雙層），不改本定案。
+  - **(2) 稽核清單即 happy path、fallback 是清單的退化態**：原 §4.1「完整記錄確認畫面」本就是人工稽核關卡；本次釐清其**同時是資料品質關卡與 LLM 中斷的降級落點**——NER 失效時清單退化為空／半填表單由人補，OCR 亦失效則退回全手動。fallback 不等於整條 pipeline 停擺：里程與係數計算段不受 LLM 影響，仍照跑。
+  - **(3) 里程/碳排「確認前顯示、送出前重算一次」**：確認前算完隨清單顯示，貼合 §8.1「碳足跡可編輯並可見」；但員工改起訖／工具後**不即時重查**（避免每次改欄位都打 TDX／Maps），改由送出前用最終值重算一遍，與「確認後入庫」收斂於同一時點，省 API、邏輯單純。（否決即時重算：體驗略好但 API 呼叫數不可控。）
+  - **(4) 三態 `entry_source` 而非兩態**：差旅來源有「AI 未改／AI 改過／純手動」三態，兩值（auto/manual）會把「AI 填了但人修正過」併入某一端、喪失 NER 準確率回溯能力；故獨立為三值欄位（與 `sensing_mode` 正交、命名不同以避免誤解為同軸）。ERD `TRAVEL_RECORD` 新增 `entry_source` 欄位。
+  - **(5) 里程/碳排試算端點 `POST /api/travel-records/preview`（不落庫）**：為讓 (3) 的「確認前顯示」與 (2) 的「fallback 手動補填後回填碳排」有對應介面，新增一支**試算端點**——收 `origin`／`destination`／`transport_mode`／`travel_date`，後端打 TDX／Maps 算里程、查係數算碳排，**只回傳不落庫**。選型與約束：
+    - **不落庫、不產生 draft 列**：稽核清單本質是「尚未入庫的候選」，用純試算避免在 DB 留下大量未確認 draft 待清；與 (3)「確認前顯示」的語意精確對齊。
+    - **需 `Bearer`**：里程查詢消耗 TDX／Maps 外部配額，掛 App token 防匿名濫打；與現有 `POST /api/travel-records` 認證一致。但 preview **不碰 `employee_id`／不寫任何庫**，故不涉 [A3] 歸戶（歸戶只在真正落庫的 POST 發生）。
+    - **preview 不定 `entry_source`**：來源標記只在 `POST`／`PATCH` 落庫時定值（`ai`／`ai_edited`／`manual`），preview 為純計算、不參與。
+    - **degraded 降級回應**：TDX／Maps 查不到里程（地名無法解析／外部 API 中斷）時**回 HTTP 200＋空里程/碳排欄位＋`degraded` 旗標**（而非 4xx/5xx），前端據以在清單顯示「需手動填」，與 (2) 的 fallback 退化態同一條 UX；錯誤不阻斷稽核流程。
+    - **落庫端點仍各自重算、不採信前端值**：`POST`／`PATCH` 內部**重新計算**里程與碳排，不信任前端由 preview 帶回的 `co2e_kg`／`distance_km`（防竄改），與 §5.1「計算集中後端、client 不直寫」及 [A3] 一致。preview 只負責「看」、落庫端點負責「算準並存」，職責分離。
+    - **落點**：屬 FastAPI 自訂邏輯端點（需查外部 API 與係數、非表名直通的 CRUD），走 §5.1「FastAPI 管資料進來怎麼算」那軌，不屬 PostgREST table-agnostic CRUD。
 
 ### 4.2 辦公室廢棄物辨識（MQTT）
 
@@ -220,7 +237,7 @@
   - `path_type = drive`：drive_usage_gb（取自 `usageInDrive`）、drive_trash_gb（取自 `usageInDriveTrash`，供激勵任務用，見 [D8]）
   （電腦路徑改送原始量——active/idle 時數、平均 CPU 使用率、CPU 型號——不再送 `pc_tdp_w`；能耗由後端計算。`factor_id`／`co2e_kg` 屬後端查係數計算後寫入，**不在 Agent payload 內**。）
   - **`employee_id` 與 `device_id` 皆不在 payload 內**：Agent 只持有 `id_token`（4.4.2，per-device 一枚），後端以 `id_token` 查 `DEVICE_BINDING` 即**同時解出 `employee_id` 與 `device_id`** 二者並落庫。故 [D14] 將 `device_id` 納入電腦路徑唯一鍵一事，對 Agent payload 零改動。
-  - **惟 `printer_serial` 必須由 Agent 上送**：印表機序號是**本地網路事實**（同 [D11] 的 `HOST`／`OID`），後端無從得知某台桌機接的是哪台印表機，只能由 Agent 經 SNMP 讀出後隨資料上送。此為 [D14] 缺口二在路徑 B 上唯一需要動 payload 之處。
+  - **惟 `printer_serial` 必須由 Agent 上送**：印表機序號是**本地網路事實**（同 [D11] 的 `HOST`／`OID`），後端無從得知某台桌機接的是哪台印表機，只能由 Agent 經 SNMP 讀出後隨資料上送。此為 [D14] 缺口二在路徑 B 上唯一需要動 payload 之處。（Eco-Agent 已依此實作：查無序號時省略 `printer_serial` 欄位，`printer_page_counter` 一律原樣送出，見 4.4.2「序號讀取」條目。）
 - **手動上傳用紙量（App 路徑，非本 Agent 上傳，v26 [D16] 定案）**：印表機路徑 B 的備選來源「手動上傳用紙量」由**員工在 Eco-Sensing App 內輸入**，**不經 Eco-Agent、不走 `agent/digital-usage/batch`**，而是走既有的 **`POST /api/digital-usages`**（PostgREST 泛用 CRUD、App 員工 `Bearer`，`employee_id` 由 App Access Token 解出、不得於 body 指定）。落庫仍進 `DIGITAL_USAGE`，但以 **`sensing_mode = manual`** 與 Agent 自動路徑（`sensing_mode = auto`）區隔（見 [D16]）：
   - **App 端彙總、後端一天一列**：員工當日可多筆記錄、每筆於送出前在 App 本地編輯；App 以某觸發機制上傳**當日彙總後的總用紙量一筆**，後端只把該筆 upsert 進「該員工×該日×`printer`×`manual`」那一列。多筆去重與編輯皆在 App 端（送出前）完成，後端不存明細、不需 `event_id` 冪等、不需 asyncpg 條件式 upsert（見 [D16]、5.1）。
   - **落庫唯一鍵**：（`employee_id`, `usage_date`, `path_type`, `sensing_mode`）——`path_type = printer`、`sensing_mode = manual`；`printer_serial` 為 NULL（手動上傳無序號),故不套 SNMP 自動路徑的 per-printer 鍵，避開 `printer_serial` 為 NULL 的去重陷阱（見 [D16]、5.1 冪等去重）。
@@ -263,6 +280,8 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 | ④ | `POST /api/agent/token/refresh` | Agent，帶 Refresh Token | 比對 `refresh_token_hash` 且 `status=active` → 發新 Access Token；已撤銷回 `401/403`（屬常駐階段，非綁定階段，但同屬本組端點且撤銷於此生效） |
 
 > **`DEVICE` 列的重複建立**：Agent 每次啟動若都呼叫 ①，綁定失敗（員工未掃、逾時）的殘留 `DEVICE` 列會持續累積。建議 Agent 於本機持久化一枚 `device_uuid`（與 4.4.3 的 SQLite 佇列同檔），索取綁定碼時帶上，後端據以 upsert `DEVICE` 而非盲插。
+>
+> **實作現況**：Eco-Agent 已實作 `device_uuid` 的產生與持久化——`Enroller.DeviceUUID()` 首次呼叫時以 UUID v4 產生一枚，寫入佇列的 state 表（與 `lastDriveQuotaCheckAt`／`lastPrinterPollAt` 同一機制），之後每次呼叫皆讀回同一值，跨重啟穩定不變；`bindLocked()` 已在（現仍為 mock 的）綁定流程一開始呼叫它，確保該值先於任何綁定嘗試存在。尚缺的只是「呼叫端點①時把它帶進 request body」這一步——待後端端點①就緒即可接上，Agent 端無需再改動。
 
 > 安全核心：Agent 全程**只接觸一次性 `binding_code`，不接觸員工帳密或員工 ID**；真正的身份驗證在已登入的手機 App 上完成，後端負責配對，符合「純感測、不碰個資」原則。
 
@@ -305,6 +324,7 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 - **HOST 填法**：只填 IP 主機位址，不含 `http://`、埠或路徑（例：印表機網頁介面為 `http://192.168.1.162:80/WebServices/Device`，HOST 僅填 `192.168.1.162`；該 HTTP/WSD 介面與 SNMP UDP 161 無關，PORT 仍為 161）。
 - **讀值即累計頁數，差分在後端**（v0.23 [D15] 修訂）：SNMP page counter 為只增不減的壽命累計值。Agent **原樣上送該讀數**（`printer_page_counter`），不在本機相減；區間用量與「本次 < 上次視為計數器重置」的防呆一律由後端依歷史列判定（後端有完整歷史，判得更準且留得下稽核紀錄，並免除 baseline 只存於 Agent 本機、重裝即遺失的問題）。
 - **序號讀取（供 [D14] 歸鍵）**：綁定時與每次輪詢各讀一次 `printer_serial`。三個候選 OID 依序試——`1.3.6.1.2.1.43.5.1.1.17`（`prtGeneralSerialNumber`，Printer-MIB，首選）、`1.3.6.1.2.1.47.1.1.1.1.11`（`entPhysicalSerialNum`，ENTITY-MIB，次選）、`1.3.6.1.2.1.1.5.0`（`sysName`，末選，管理員可改、不保證唯一）。低階機種常三者皆回空值，屬**待實測項**；全空時回退以 `device_id` 歸鍵並將該列標記為「印表機身份不明」。**不以 `PRINTER_HOST`（IP）當鍵**——DHCP 會變，且不同辦公室的同段私有 IP 會誤撞。
+  - **實作現況**：Eco-Agent 已依三候選 OID 鏈實作序號讀取（含 `ECO_AGENT_PRINTER_SERIAL_OID` 單一 OID 覆寫、GET 落空時巡走整欄的相容處理），查無序號時 payload 省略該欄位。惟「綁定時讀一次」尚未落地——現階段綁定流程仍為 mock、不觸發任何 SNMP 呼叫，故序號目前只在每次輪詢時讀取；待接上真實綁定後端後再補上綁定時的讀取。「全空時回退以 `device_id` 歸鍵並標記」屬後端職責（Agent 從不持有 `device_id`），待後端就緒後才落地。
 - 綁定時可將非敏感的 `HOST`／`OID` 上報一份供 Web 後台監控裝置對應的印表機，但**不由後端反向下發覆蓋本地**，避免蓋掉正常的本地設定。輪詢區間 `printerPollInterval` 仍屬全域策略，走 5.2 下發（見 4.4.4）。
 
 ##### 4.4.3 資料上傳觸發模型：本地持久化佇列 + 多重觸發
@@ -535,6 +555,20 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 - 連線字串以新增環境變數 `SUPABASE_DB_URL` 提供（`postgresql://...:6543/...`），與既有 `SUPABASE_URL`／`SUPABASE_KEY`（PostgREST 用）**並存而非取代**；pool 於 FastAPI lifespan 建立、掛於 `app.state`。
 - **既有 `services/crud.py` 與所有既有 router 不需改動**；本決策為「加一條路」而非「換一條路」。
 - **架構分工原則**：Supabase 管「資料存哪裡」；FastAPI 管「資料進來後怎麼算」——請求驗證、排放係數查詢、CO₂e 計算、廢棄物 session 配對歸戶、獎勵（EXP／碳幣）發放。App、樹莓派、Eco-Agent 一律經 FastAPI 進資料庫，**不直接讀寫 Supabase**，維持商業邏輯集中與控制面／數據面分離。
+- **`travel-records` 端點清單（差旅核算；`preview` 為 4.1 [D2](5) 新增）**：
+
+  | Method | 路徑 | 認證 | 用途 |
+  |--------|------|------|------|
+  | `GET` | `/api/travel-records` | 不需 Bearer（現況程式碼未掛，見下方提醒） | 列表（分頁） |
+  | `POST` | `/api/travel-records/preview` | **需 `Bearer`** | **試算里程/碳排、不落庫**（4.1 [D2](5)）：收 `origin`／`destination`／`transport_mode`／`travel_date`，後端打 TDX／Maps＋查係數，回 `distance_km`／`co2e_kg`／`factor_id`；查不到里程時回 `200`＋空欄位＋`degraded` 旗標。不碰 `employee_id`、不定 `entry_source` |
+  | `POST` | `/api/travel-records` | **需 `Bearer`** | 建立一筆；`employee_id` 由 token 解出自動寫入；**內部重算里程/碳排、不採信前端帶回值**；定 `entry_source`（`ai`／`ai_edited`／`manual`） |
+  | `GET` | `/api/travel-records/{record_id}` | 不需 Bearer | 取單筆 |
+  | `PATCH` | `/api/travel-records/{record_id}` | **需 `Bearer`** | 修正既有紀錄（不改 `employee_id`）；**內部重算**；人改過即記 `entry_source='ai_edited'` |
+  | `DELETE` | `/api/travel-records/{record_id}` | 不需 Bearer | 刪除 |
+
+  - **提醒（沿 5.1 [D5] 全系統原則）**：`GET`／`DELETE` 現況未掛 `Bearer`，與「寫入端 `employee_id` 一律由憑證解出」的原則屬不同面向（讀取/刪除非歸戶寫入），但 `DELETE` 無認證等於任何人可刪任意紀錄，應於 P1 補認證與擁有者檢查（列第 7 節待補）。`preview` 雖不落庫，仍掛 `Bearer` 以防匿名濫打 TDX／Maps 配額。
+  - **`preview` 屬 FastAPI 自訂邏輯端點**（查外部 API＋算係數，非表名直通 CRUD），走上方「FastAPI 管資料進來怎麼算」那軌，不屬 PostgREST table-agnostic CRUD；與 `POST`／`PATCH` 共用同一套里程/係數計算實作，僅差在是否落庫。
+
 - **資料寫入策略（v0.20 起依來源分兩軌）**：
   - **MQTT 軌（廢棄物樹莓派）**：MQTT Broker（Mosquitto）本身即為天然緩衝（訊息佇列）：後端 MQTT consumer 訂閱 topic → 記憶體佇列累積 → 定時／定量**批次寫入（batch insert）** Supabase。
   - **HTTPS 軌（Eco-Agent，4.4 [D13] 起三路徑全走此軌）**：批次緩衝改由 **Agent 本地持久化佇列**承擔（4.4.3），後端**不再為此路徑設記憶體佇列**——收到一批（`uploadBatchMax` 上限 720 筆）即於**單一交易內**完成去重與 upsert，**commit 之後才回 `200`**。後端不緩衝反而是此軌的正確設計：唯有如此「`200` = 已落地」才成立，4.4.3 的端到端至少一次送達才無破口。**嚴禁先回 `200` 再非同步落地。**
@@ -754,7 +788,7 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 - **主框架**：`EmployeeHomePage` 採五分頁底部導覽——儀表板、i 減碳、掃描、排行榜、個人。
 - **碳排儀表板（首頁）**：Hero 指標（較上月、月目標）、使用者卡片（顯示名稱／等級／碳幣）、經驗值進度條（每級 500 EXP）、每日減碳建議輪播、月度碳排組成（差旅／廢棄物圓餅圖與週趨勢）、近期碳排紀錄。規劃中：能源活動統計（電梯、數位碳足跡）整合呈現與數據分享。
 - **i 減碳**：月度碳排獎勵彈窗、減碳成果統計與月目標進度、任務類別篩選（交通／廢棄物／能源／飲食／辦公）、減碳任務列表（含 EXP／碳幣／預估減碳量）。任務資料涵蓋商務差旅、大眾運輸、自行車通勤、共乘、廢棄物、電梯、餐飲、無紙化。
-- **掃描**：三軌單據掃描（OCR 流程，UI 完整、辨識為模擬）——票據類型／日期／起訖／金額／碳足跡皆可編輯，確認後走「AI 辨識中→完成獎勵」；掃描垃圾桶（智慧回收 demo，QR→投入→AI 計算→結果動畫）；**手動上傳用紙量**（印表機路徑備選，對應 4.4 [D6]，使用者主動感測、須搭誘因；**落地定案見 4.4 [D16]**——當日可多筆記錄、每筆送出前於 App 本地編輯，App 彙總後走 `POST /api/digital-usages`（`sensing_mode='manual'`）上傳，後端一天一列）。
+- **掃描**：三軌單據掃描（OCR 流程，UI 完整、辨識為模擬）——**App 拍照上傳、辨識於後端**（OCR＋GPT-4o NER）；票據類型／日期／起訖／金額／碳足跡皆可編輯，確認畫面即人工稽核關卡，改動起訖／工具者於送出前由後端以最終值重算里程與碳排，確認後走「AI 辨識中→完成獎勵」；每筆落庫記 `entry_source` 三態；LLM 中斷時清單退化為空／半填表單由員工手動補填（見 4.1 [D2]）；掃描垃圾桶（智慧回收 demo，QR→投入→AI 計算→結果動畫）；**手動上傳用紙量**（印表機路徑備選，對應 4.4 [D6]，使用者主動感測、須搭誘因；**落地定案見 4.4 [D16]**——當日可多筆記錄、每筆送出前於 App 本地編輯，App 彙總後走 `POST /api/digital-usages`（`sensing_mode='manual'`）上傳，後端一天一列）。
 - **排行榜**：部門排行（各部門對應不同指標與單位——業務差旅減碳、研發用電節省、人資用紙減少、行銷廢棄物減量、物流車輛碳減）、個人排名卡、頒獎台與排名列表、名次獎勵說明。
 - **個人資料**：資料／成就／設定三分頁——基本資料編輯、等級與獎勵、修改密碼（前端流程完成待串接）；成就解鎖與展示櫃；組織資訊、外觀語言、通知、帳戶（分享碳排檔案／下載數據／登出／刪除帳號）、關於。另有**我的 QR Code 彈窗**（`QRCodePopup`，產生員工識別 QR 供掃碼辨識身份）。
 - **遊戲化與獎勵機制（跨頁面，規劃中）**：EXP／等級（每級 500 EXP）、碳幣、成就與展示櫃、排行榜名次獎勵、減碳任務、月度結算彈窗。最終規則（經驗值曲線、碳幣兌換、與 Shared Savings／GDT 連動）尚待確認（見 1.7）。
@@ -878,3 +912,5 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 | 2026-08-13 | v0.24 | **App 端憑證機制定案：比照 Eco-Agent 採雙 token**，回填 v0.22 遺留的「App token 儲存位置與效期策略／是否比照雙 token」待設計議題。決議 App 端採短效 App Access（1h）＋長效 App Refresh（30 天、不輪換），運作與 4.4.2 Eco-Agent 雙 token 同構（Access 每請求用、過期以 Refresh 無感換發，Refresh 亦過期／撤銷才重登）。**主要依據為《App 系統功能》§1.0「App 冷啟動時自動判斷是否已登入」需求**：該需求要「打開即進、長期免登入」的體驗，單枚短效 JWT 冷啟動幾必過期而須頻繁重登、與需求對撞，若改拉長單枚 JWT 的 `exp`（如 30 天）則因 JWT 無法即時撤銷、又無 Eco-Agent「每次上傳夾帶撤銷」通道兜底，等於把唯一風險上界放到最大且落在誘因機制（EXP／碳幣／Shared Savings）最不能被冒用處；雙 token 拆開「證明身份（短 Access）」與「保持登入（長 Refresh）」，同時取得短風險窗口、長期免登入、可撤銷三者。載明：冷啟動以 `flutter_secure_storage` 中 Refresh 靜默續 Access（無網時先進 App 看快取、待網補換）；**過期判定權在後端**（`get_current_employee` 每請求驗簽＋驗 `exp`、回 `401`），App 讀 `exp` 僅作 UX 預判、以收到 `401` 觸發續期／重登；Refresh 存 secure storage 不放 `SharedPreferences`；後端存 `refresh_token_hash` 供撤銷（離職／遺失標 `revoked`，Access 至多撐≤1h）；效期取值**脫鉤「月結算」**（30 天為體驗與風險之折衷，與資料聚合排程無關、同以月為單位僅屬巧合）；不啟用 Refresh 輪換（列 P3）。連帶更新：現況快照「App 身份認證」列、4.4.4 憑證效期表（改標題為「憑證效期（後端簽發策略，不下發）」並補 App Access／App Refresh 兩列，加註本組屬後端簽發策略非 `sensor_config` 下發參數）、5.1 [D5] 新增 v0.24 決議子段（含冷啟動流程、後端判定權、儲存位置、撤銷、效期脫鉤月結算、P1 落地影響——`login` 改一次簽發雙 token、新增 App 換發端點）、P1 工作項、第 7 節該待設計議題標記已決議。 |
 | 2026-08-13 | v0.25 | **新增第 8 章「Eco-Sensing App（前端應用層）」，將 App 相關內容自 §4／§5 抽出獨立呈現，並併入《App 系統功能 v0.4》**。動機：App 自身的功能、實作狀態與身份驗證決議屬「前端應用層」，性質有別於 §4 四大感測／核算模組與 §5 橫切層，散置各處不利檢視，故集中為獨立章節。新章節結構：8.1 員工端功能（Flutter）規格、8.2 企業端功能（Vue Web 後台）規格、8.3 實作狀態表（原《App 系統功能》「實作狀態」✅／🟡／⚪ 獨立拉出，員工端 App1.0–1.8 與企業端 App2.0–2.7 兩表）、8.4 App 身份驗證雙 token 機制（集中呈現雙 token 規格與 App Access 1h／App Refresh 30 天數值，與 4.4.4、5.1 [D5] 同源）、8.5 決策記錄（**原《App 系統功能》版本紀錄繼承為本章決策記錄**，另加 [A1] 雙 token、[A2] 純前端登入隱藏依賴、[A3] employee_id 由憑證解出三條 App 專屬決策）。章節編號：新章節插為 §8，原 §8 版本紀錄順移為 §9；§6 Roadmap、§7 Open Questions 位置與所有「第 7 節」交叉引用不變。**檔案治理**：《Eco-Sensing_App_系統功能_v04.md》自本版起封存、不再維護，App 功能演進改於本章第 8 章更新（8.5 版本紀錄末列已註記併入）。5.1 [D5] 與 4.4.4 效期表維持為雙 token 之權威出處，8.4 為 App 落地形狀之集中複述。 |
 | 2026-08-21 | v26 | **手動上傳用紙量落地定案（新增 [D16]）**，收斂《驗證機制端點關係表》§3.1 點出的 `digital-usages`（複數）vs `digital-usage/batch`（單數）定位落差。五點定案：(1)**端點定位**——`POST /api/digital-usages`（PostgREST 泛用 CRUD、App 員工 `Bearer`）正式保留作 App 手動補登管道，與 Agent 自動路徑並存為 `DIGITAL_USAGE` 兩來源；手動上傳因 App 端已彙總、無條件式 upsert／交易控制需求，落 PostgREST 側（[D4] 判準的正確套用），不動用 asyncpg。(2)**Agent 端點更名**——`POST /api/digital-usage/batch` 更名為 `POST /api/agent/digital-usage/batch`、收進 `/api/agent/*` 命名空間（與 4.4.2 綁定鏈同組），以命名空間承載「員工 vs 裝置」認證體系差異、消除與複數 `digital-usages` 的混淆；改未實作的 Agent 端而非已實作的 App 端，正名零成本。(3)**來源識別**——`DIGITAL_USAGE` 新增獨立欄位 `sensing_mode`（`auto`／`manual`）而非於 `path_type` 加 `printer_manual` 值,理由為正交性（`path_type` 描述感測對象、`sensing_mode` 描述感測方式）,避開 [D14] per-printer 鍵在 `printer_serial` 為 NULL 時的去重陷阱;**現況取捨聲明**:手動補登目前只用於印表機、不預期擴散,拆欄是為保留擴充性與模型正交/查驗乾淨,非因當前會擴散。(4)**去重鍵與彙總**——採 App 端彙總、後端一天一列:員工當日多筆記錄、每筆送出前於 App 本地編輯,App 上傳當日彙總總量一筆,後端 upsert 唯一鍵（`employee_id`, `usage_date`, `path_type='printer'`, `sensing_mode='manual'`）;後端不存明細、不需 per-筆 `event_id` 冪等、不需 asyncpg;`collected_at` 沿用作防亂序重送保險（與編輯無關,編輯在本地送出前完成）。(5)**兩管道互斥**——個人專屬機走 Agent SNMP（`auto`）、共用機走 App 手動（`manual`）,同一台機器不同時產生兩列,無雙重計算。連帶更新:現況快照印表機歸戶列與後端列、4.4 路徑表 B 列、4.4 payload 段（Agent 端點更名＋新增手動路徑獨立說明）、4.4.3 落庫鍵段（補手動路徑不屬 Agent 事件 ID 段之註記與 `collected_at` 防亂序用途）、5.1 資料存取層分工表兩列、5.1 冪等去重 index SQL（三個 partial index 增為四個、皆帶 `sensing_mode` 述詞、新增 `uq_digital_usage_printer_manual`）與實作註記、P1 工作項、8.1 手動上傳描述;新增決策記錄 [D16];第 7 節新增已決議一項（§3.1 定位落差）與待釐清子項（落庫後更正語意 `PATCH` vs 重送覆蓋、手動上傳觸發機制與誘因設計）。**ERD 同步**:`DIGITAL_USAGE` 新增 `sensing_mode` 欄位。不動 [D12]（`path_type` 三值與 Agent 明送原則）、[D14]（三組 Agent 自動路徑鍵,僅補 `sensing_mode='auto'` 述詞）、[D4]（分流判準不變）。 |
+| 2026-09-15 | v27 | **差旅稽核流程與 LLM 中斷 fallback 落地定案（新增 4.1 [D2]）**。確立差旅核算完整流程：**App 拍照上傳 → 後端 OCR＋GPT-4o NER → App 顯示稽核清單供人工編輯 → 送出前重算 → 入庫**。四點定案：(1)**OCR／NER 落後端、App 純上傳入口**——辨識鏈依賴 GPT-4o、TDX、Maps 與後端係數庫,集中後端與 §4.2、[A3] 一致;端上即時預覽（若做）另以 ML Kit 走雙層,不改本定案。(2)**稽核清單即 happy path、fallback 為其退化態**——原「完整記錄確認畫面」釐清為同時是人工稽核關卡、資料品質關卡與 LLM 中斷降級落點;NER 失效退空／半填表單由人補、OCR 亦失效退全手動（等同軌道 B）,里程與係數計算段不受 LLM 影響照跑。(3)**里程/碳排「確認前顯示、送出前重算一次」**——確認前算好隨清單顯示（貼合 §8.1 碳足跡可編輯可見）,員工改起訖／工具後不即時重查,送出前以最終值由後端重算一遍,與入庫同一時點,省 API;否決即時重算（API 數不可控）。(4)**三態來源標記 `entry_source`**（`ai`／`ai_edited`／`manual`）——差旅有「AI 未改／AI 改過／純手動」三態,兩值 auto/manual 會喪失 NER 準確率回溯,故獨立三值欄位、與 §4.4 `sensing_mode` 正交且命名分離;入庫一律以確認畫面最終值為準。連帶更新:現況快照差旅列、§8.1 掃描描述、§4.1 規格段（新增端點定位、稽核確認流程、fallback、來源標記四小節）;新增 [D2]。**ERD 同步**:`TRAVEL_RECORD` 新增 `entry_source` 欄位。不動三軌路徑表、[D1]（手動上傳照片前提不變）。 |
+| 2026-09-15 | v28 | **新增里程/碳排試算端點 `POST /api/travel-records/preview`（4.1 [D2] 增補 (5)）**。為讓 v27 [D2](3)「確認前顯示」與 (2)「fallback 手動補填後回填碳排」有對應介面,採方案 B（計算與落庫分離）新增一支**不落庫試算端點**:收 `origin`／`destination`／`transport_mode`／`travel_date`,後端打 TDX／Maps 算里程、查係數算碳排,只回傳不寫庫。五點約束:(1)**不落庫、不產生 draft 列**——稽核清單本質為未入庫候選,純試算避免 DB 積未確認 draft,精確對齊 (3)「確認前顯示」語意。(2)**需 `Bearer`**——里程查詢耗 TDX／Maps 外部配額,掛 App token 防匿名濫打;但 preview 不碰 `employee_id`／不寫庫,不涉 [A3] 歸戶（歸戶只在真正落庫的 POST 發生）。(3)**preview 不定 `entry_source`**——來源標記只在 POST／PATCH 落庫時定值,preview 為純計算不參與。(4)**degraded 降級回應**——TDX／Maps 查不到里程（地名無法解析／外部 API 中斷）時回 **HTTP 200＋空里程/碳排欄位＋`degraded` 旗標**（非 4xx/5xx）,前端據以顯「需手動填」,與 (2) fallback 退化態同一條 UX,錯誤不阻斷稽核。(5)**落庫端點仍各自重算、不採信前端值**——POST／PATCH 內部重算里程與碳排,不信任 preview 帶回的 `co2e_kg`／`distance_km`（防竄改）,與 §5.1「計算集中後端」及 [A3] 一致;preview 只負責「看」、落庫端點負責「算準並存」,職責分離。落點屬 FastAPI 自訂邏輯端點（查外部 API＋算係數,非表名直通 CRUD）,走 §5.1「FastAPI 管資料進來怎麼算」軌,與 POST／PATCH 共用同一套里程/係數計算實作、僅差是否落庫。連帶更新:§4.1 [D2] 新增 (5)、§5.1 新增 `travel-records` 端點清單表（含現有五端點與 preview,並註記 `GET`／`DELETE` 現況未掛 Bearer、`DELETE` 應於 P1 補認證與擁有者檢查）、現況快照差旅列補 preview。不動 ERD（preview 不落庫、無欄位變更）、不動 [D1]。 |
