@@ -33,9 +33,9 @@
 | Agent 撤銷 | 每次上傳夾帶撤銷狀態（不另做心跳），`401/403` 即自清憑證；離線延遲上界 ≈ maxAge；上傳全走 HTTPS 後此回應通道原生成立（[D13]） | 4.4.2 |
 | 後端 | FastAPI＋Supabase（PostgreSQL）；**資料存取分兩層——一般 CRUD 走 Supabase PostgREST（既有 `services/crud.py` 泛用層，含 App 手動上傳用紙量 `POST /api/digital-usages`），Eco-Agent 自動感測 `POST /api/agent/digital-usage/batch`（v26 由 `digital-usage/batch` 更名、收進 `/api/agent/*`）走 asyncpg 直連 connection pooler（6543）**（[D4]、[D16]）；**寫入全走 HTTPS（v29）——樹莓派廢棄物事件即時直寫（4.2 [D4]）／HTTPS 批次端點（Eco-Agent）**；`DIGITAL_USAGE` 冪等去重採應用層摺疊＋DB partial unique index（**v26 由三個增為四個，新增手動印表機路徑，並以 `sensing_mode` 述詞區分自動／手動**）；讀取端快取 | 5.1 |
 | Controller | 自建輕量版，FastAPI 內管理模組（控制面／數據面邏輯分離）；配置經 MQTT retained＋HTTPS 夾帶雙通道下發（v29 後 MQTT 僅剩樹莓派配置下發此一用途；v30：Demo 樹莓派未連 MQTT，該通道未落地、待決議） | 5.2 |
-| Eco-Sensing App（前端應用層） | 員工端 Flutter＋Riverpod、企業端 Vue Web 後台；功能、實作狀態（✅／🟡／⚪）與 App 專屬決策集中於第 8 章（原《App 系統功能》文件已併入、封存） | 8 |
-| App 身份認證 | **目前為純前端登入（不驗帳密、後端不知情）**；後端認證列為 P1 前置工作，`employee_id` 一律由憑證解出、不得由 client 於 body 指定（全系統統一原則，5.1 [D5]）；**憑證機制定案比照 Eco-Agent 採雙 token**——短效 App Access（1h）＋長效 App Refresh（30 天、存 `flutter_secure_storage`、後端存 hash 可撤銷），冷啟動以 Refresh 靜默續 Access 達成 §App1.0「自動判斷已登入」、過期判定權在後端（`401` 觸發）（5.1 [D5]、8.4） | 8.4、5.1、4.4.2 |
-| 開發階段 | Roadmap 第一～三步進行中；後端依 P1→P2→P3 推進，P1 未開始 | 6、5.1 |
+| Eco-Sensing App（前端應用層） | 員工端 Flutter＋Riverpod、企業端 Vue Web 後台；功能、實作狀態（✅／🟡／⚪）與 App 專屬決策集中於第 8 章（原《App 系統功能》文件已併入、封存）。**v33 依 `main` 分支程式碼重新盤點 8.3**：除身份認證外仍全為假資料；垃圾桶真實 API 串接只在 `u1` 分支、未併入 `main`；電梯 NFC 程式碼仍在、待下線；v32 新功能（垃圾桶 NFC、今日待辦、會議取代出差、手動用紙量）皆 ⚪ | 8.3 |
+| App 身份認證 | **v33：雙 token 已端到端落地**——後端 B1–B6 ✅（`APP_SESSION`、`POST /api/auth/login`、換發端點、`get_current_employee`、撤銷、測試帳號）；App A1–A5 ✅（真實登入、Refresh 存 `flutter_secure_storage`、冷啟動靜默續期含離線放行、`ApiClient` 401 換發＋重放、撤銷導回登入）；A6（歸戶請求 body 不帶 `employee_id`）⬜，待各功能串接 API 時一併落實（《App 驗證機制開發參考》§7.1）。`employee_id` 一律由憑證解出、不得由 client 於 body 指定（全系統統一原則，5.1 [D5]）；**憑證機制定案比照 Eco-Agent 採雙 token**——短效 App Access（1h）＋長效 App Refresh（30 天、存 `flutter_secure_storage`、後端存 hash 可撤銷），冷啟動以 Refresh 靜默續 Access 達成 §App1.0「自動判斷已登入」、過期判定權在後端（`401` 觸發）（5.1 [D5]、8.4） | 8.4、5.1、4.4.2 |
+| 開發階段 | Roadmap 第一～四步進行中（第四步目前只串通身份認證）；後端依 P1→P2→P3 推進，**P1 的 App 認證前置工作已完成**，其餘 P1 範圍（各模組 API 跑通、資料落地）進行中 | 6、5.1 |
 
 ---
 
@@ -952,7 +952,7 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 | 第一步 | Eco-Sensing App GUI | Flutter 三平台 App，先用假資料撐 UI（按鈕事件簡易回饋），Provider/Riverpod 狀態管理 | 🟡 進行中 |
 | 第二步 | 銜接硬體（IoT） | 智能垃圾桶 QR Code 模組、電梯 NFC；實作 SD-IoT 架構與 Controller | 🟡 進行中 |
 | 第三步 | 建立伺服器 | Supabase（PostgreSQL）依 ERD 建表、FastAPI 服務與碳排運算引擎、寫入全走 HTTPS（廢棄物樹莓派事件即時寫入／Eco-Agent HTTPS 批次冪等 upsert；v29 起 MQTT consumer 廢止）（依 5.1 分階段 P1→P2 推進） | 🟡 進行中 |
-| 第四步 | 串接 API | 同步後端與前端數據；串接大語言模型 API | ⬜ 未開始 |
+| 第四步 | 串接 API | 同步後端與前端數據；串接大語言模型 API | 🟡 進行中（v33：App 身份認證已串通；各功能資料仍為假資料） |
 | 第五步 | 測試與實驗 | 系統穩定性、防呆機制測試；導入學校/中小企業實驗環境並記錄成果 | ⬜ 未開始 |
 
 > 狀態欄位請隨進度更新：⬜ 未開始 / 🟡 進行中 / ✅ 完成
@@ -1066,11 +1066,11 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 >
 > 依賴：後端認證與 `get_current_employee`（5.1 [D5]）｜Eco-Agent 綁定流程與雙 token（4.4.2）｜QR 統一辨識（4.5）｜電梯 NFC deep link（4.3、`app_links`）｜遊戲化與 Shared Savings（1.7）
 >
-> 技術現況：員工端為 **Flutter + Riverpod**（feature-first 架構）；企業端為獨立 **Vue 3 Web 後台**（Composition API、Vite、純 SVG／CSS 自繪圖表）。兩端目前資料皆為前端模擬（mock），尚未串接後端 API、OCR 引擎與碳排計算模型。
+> 技術現況：員工端為 **Flutter + Riverpod**（feature-first 架構）；企業端為獨立 **Vue 3 Web 後台**（Composition API、Vite、純 SVG／CSS 自繪圖表）。兩端目前資料皆為前端模擬（mock），尚未串接後端 API、OCR 引擎與碳排計算模型；**唯一例外是員工端身份認證（v33）**，已串接後端雙 token（8.4）。員工端另有帶身份的共用 HTTP 入口 `ApiClient`（自動帶 `Bearer`、401 換發＋重放），但目前還沒有功能頁面使用它。
 
 ### 8.1 員工端功能（Flutter App）規格
 
-- **登入與身份切換（8.3 對應 §App1.0）**：登入頁提供員工端／企業端身份選擇；郵箱、密碼欄位（可切換顯示）。**目前不驗證帳密**（選「員工端」即進入），後端認證列為 P1 前置工作（見 5.1 [D5]、本章 8.4）。登入狀態保留於本機，**App 冷啟動時自動判斷是否已登入**（此需求為 8.4 雙 token 決議的關鍵依據）。儀表板與「個人 > 設定」皆提供登出。
+- **登入與身份切換（8.3 對應 §App1.0）**：登入頁提供員工端／企業端身份選擇；郵箱、密碼欄位（可切換顯示）。**v33：員工端已改為真實登入**（`POST /api/auth/login` 驗帳密、簽發雙 token，見 8.4）；原「不驗證帳密、選員工端即進入」的 demo 捷徑已移除。登入狀態保留於本機，**App 冷啟動時自動判斷是否已登入**（此需求為 8.4 雙 token 決議的關鍵依據）。儀表板與「個人 > 設定」皆提供登出。
 - **主框架**：`EmployeeHomePage` 採五分頁底部導覽——儀表板、i 減碳、掃描、排行榜、個人。
 - **碳排儀表板（首頁）**：Hero 指標（較上月、月目標）、使用者卡片（顯示名稱／等級／碳幣）、經驗值進度條（每級 500 EXP）、每日減碳建議輪播、月度碳排組成（差旅／廢棄物圓餅圖與週趨勢）、近期碳排紀錄。規劃中：能源活動統計（電梯、數位碳足跡）整合呈現與數據分享。
 - **i 減碳**：月度碳排獎勵彈窗、減碳成果統計與月目標進度、任務類別篩選（交通／廢棄物／能源／飲食／辦公）、減碳任務列表（含 EXP／碳幣／預估減碳量）。任務資料涵蓋商務差旅、大眾運輸、自行車通勤、共乘、廢棄物、餐飲、無紙化（**v31 移除電梯任務**；新增「參與感測與歸戶」類任務，如掃碼歸戶投入，見 2.1）。
@@ -1099,15 +1099,16 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 
 | # | 功能 | 狀態 | 備註 |
 |---|------|------|------|
-| App1.0 | 登入與身份切換 | ✅🟡 | 登入 UI 與狀態保留完成；**不驗帳密、後端不知情**；冷啟動自動判斷已登入 ✅。後端認證＋雙 token 為 P1（8.4） |
+| App1.0 | 登入與身份切換 | ✅ | **v33：真實登入與雙 token 已落地**（8.4）——`POST /api/auth/login`、Refresh 存 `flutter_secure_storage`、冷啟動靜默續期（換發時無網路仍放行進 App）、`ApiClient` 401 換發＋重放、撤銷／換發被拒時統一導回登入頁。登入頁仍保留員工端／企業端切換，選企業端僅提示「待開發」（企業端為獨立 Vue 後台） |
 | App1.1 | 底部導覽列（主框架） | ✅ | 五分頁 |
-| App1.2 | 碳排儀表板（首頁） | ✅🟡 | 指標與圖表多為固定／假資料 |
-| App1.3 | i 減碳 | ✅🟡 | 任務與獎勵為假資料；v31 需移除電梯任務、新增參與歸戶類任務 |
-| App1.4 | 掃描（單據／垃圾桶／手動用紙量） | ✅🟡⚪ | OCR 為模擬；**垃圾桶流程（v30，Demo 暫時性方案）已串接真實 API**（`POST /trash/session`＋Supabase Realtime 五階段進度、完成頁顯示類型／重量／碳排），但 QR 掃描仍為約 1.5 秒計時模擬、不解碼；手動上傳用紙量 ⚪ 待開發 |
-| App1.5 | 排行榜 | ✅🟡 | 依部門指標排名，假資料；排名分享 ⚪ |
-| App1.6 | 個人資料（資料／成就／設定） | ✅🟡 | 修改密碼待串接；QR Code 產生 🟡；檔案分享 ⚪ |
+| App1.2 | 碳排儀表板（首頁） | ✅🟡⚪ | 指標與圖表多為固定／假資料；**v32「今日待辦」⚪**（依 Outlook 行事曆列出待登錄出差、可標「不是出差」，4.1） |
+| App1.3 | i 減碳 | ✅🟡⚪ | 任務與獎勵為假資料；**v33 盤點：電梯任務仍在**（`action_tasks_provider.dart`，v31 應移除）；「參與感測與歸戶」類任務 ⚪ |
+| App1.4 | 掃描（單據／垃圾桶／手動用紙量） | ✅🟡⚪ | **單據**：UI 完整，辨識為寫死的假資料、上傳為計時模擬；尚未串接上傳、`POST /api/travel-records/preview`（含 `degraded`）、`POST /api/travel-records`、重複單據提示。**v33 盤點與 4.1 [D2](6) 的落差**：里程欄目前一律可編輯（規格為正常唯讀、僅 degraded 開放手填）；碳足跡型別不可為 `null`、無「尚未計算」狀態，標題仍為「碳足跡（預估）」；送出時仍回傳碳排與 EXP（規格為只送事實欄位、後端重算），且未判定 `entry_source`。**垃圾桶**：真實 API 串接（v30 Demo：`POST /trash/session`＋Supabase Realtime 五階段進度）**只在 `u1` 分支、尚未併入 `main`**；`main` 仍為計時模擬（相機開啟、不解碼）。v32 改 NFC 感應 ⚪。**手動上傳用紙量** ⚪（4.4 [D16]） |
+| App1.5 | 排行榜 | ✅🟡 | 依部門指標排名，假資料；排名分享 ⚪；v31 個人排名改依參與（[A4]）⚪ |
+| App1.6 | 個人資料（資料／成就／設定） | ✅🟡 | 修改密碼前端流程完成、API 待串接；QR Code 產生 🟡；分享碳排檔案／下載數據僅有提示、未實作 ⚪ |
 | App1.7 | 遊戲化與獎勵機制 | ⚪ | 現行雛形，最終規則（含與 Shared Savings／GDT 連動）待定 |
-| App1.8 | IoT 感測整合（~~電梯 NFC~~／垃圾桶 QR） | ⛔ | **v31 電梯 NFC 停用**（原 deep link 流程已完成，下線處理）；垃圾桶 QR 併於 App1.4 |
+| App1.8 | IoT 感測整合（~~電梯 NFC~~／垃圾桶 NFC） | ⛔⚪ | **v31 電梯 NFC 停用，但 v33 盤點程式碼尚未下線**：`main.dart` 仍以 `app_links` 解析 `counter` 參數記錄電梯樓層，`iot_sensing/elevator_iot/`（`elevator_provider`、`pending_nfc_provider`、`NfcTriggerCard`）仍在。下線時 deep link 接收骨架（冷啟動／背景喚醒、未登入暫存）改給 **v32 垃圾桶 NFC 感應** 沿用（4.2 [D7]）⚪ |
+| App1.9 | 會議取代出差（避免排放） | ⚪ | v32 新增（4.1）：員工在 App 確認某筆出差「改線上」後記一筆 `AVOIDED_EMISSION`、只進激勵帳、固定額度回饋 |
 
 **企業端（Vue Web 後台）**
 
@@ -1122,13 +1123,13 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 | App2.6 | ESG 目標 | ✅🟡 | 全假資料 |
 | App2.7 | 系統設定 | ✅🟡 | 表單僅前端綁定、未持久化 |
 
-> 全端共通現況：所有數據皆為前端模擬（mock），尚未串接後端 API 與真實感測資料流。串接真 API 為 Roadmap 第四步、後端 P1 起（見 §6、5.1）。
+> 全端共通現況：除員工端身份認證（App1.0，v33）外，所有數據皆為前端模擬（mock），尚未串接後端 API 與真實感測資料流。串接真 API 為 Roadmap 第四步、後端 P1 起（見 §6、5.1）。員工端 8.3 狀態以 `main` 分支為準（v33 盤點）；其他分支上的進度（如 `u1` 垃圾桶串接）於備註另註。
 
 ### 8.4 App 身份驗證：雙 token 機制（規格·現行定案）
 
 > 出處與跨模組原則見 5.1 [D5]；本節為 App 端落地形狀的集中呈現。與 4.4.2 Eco-Agent 雙 token **同構**（差別僅在觸發情境：Agent 背景常駐、App 冷啟動）。
 
-- **現況**：App 目前為**純前端登入**（不驗帳密、後端不知情，`DemoAuthStorage` 僅存登入狀態）。後端認證列為 **P1 前置工作**。
+- **現況（v33）**：**雙 token 已端到端落地**，本節規格即現行實作。後端 B1–B6 ✅、App A1–A5 ✅；A6（歸戶請求 body 不帶 `employee_id`）⬜，需等各功能頁面改走 `ApiClient` 串接 API 時一併落實。逐步進度與端點封包見《App 驗證機制開發參考》§4.2、§7.1。App 端對應程式：`AuthApi`（login／refresh）、`AuthStorage`（Refresh 存 secure storage、Access 只放記憶體）、`AuthBootstrapper`（冷啟動三態 `loggedIn`／`loggedInOffline`／`loggedOut`）、`ApiClient`（401 換發＋重放一次；換發被拒時拋 `SessionExpiredException` 並遞增 `forcedLogoutProvider`，由根層導回登入頁）。原 `DemoAuthStorage` 已移除。
 - **全系統原則（承 [D5]）**：`employee_id` **一律由憑證解出，不得由 client 於 request body 指定**；此為四大模組共同約束，非 App 或 Eco-Agent 專屬。
 - **憑證機制：比照 Eco-Agent 採雙 token**：
   - **App Access Token（短效，1 小時）**：每個需歸戶的請求帶 `Authorization: Bearer`；不落庫，由 App Refresh Token 換發。
@@ -1163,7 +1164,7 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 **App 專屬決策（併入後）**
 
 - **[A1] App 端憑證機制採雙 token（承 5.1 [D5]、v0.24 定案）**：決議 App 端比照 Eco-Agent 採短效 App Access（1h）＋長效 App Refresh（30 天、不輪換）。**主要依據為 8.1 §App1.0「App 冷啟動時自動判斷是否已登入」需求**——該需求要「打開即進、長期免登入」的體驗，單枚短效 JWT 冷啟動幾必過期而須頻繁重登、與需求對撞；若改拉長單枚 JWT 的 `exp`（如 30 天），則因 JWT 無法即時撤銷、又無 Eco-Agent「每次上傳夾帶撤銷」通道兜底，等於把唯一風險上界放到最大，且落在誘因機制（EXP／碳幣／Shared Savings）最不能被冒用處。雙 token 拆開「證明身份（短 Access、風險窗口小）」與「保持登入（長 Refresh、給體驗）」，同時取得短風險窗口、長期免登入、可撤銷三者。細節（冷啟動流程、後端判定權、儲存位置、撤銷、效期脫鉤月結算）見 8.4 與 5.1 [D5]。
-- **[A2] 純前端登入為隱藏依賴，後端認證列 P1（承 [D5]）**：原以為 App「已有完整登入身份系統」屬事實誤述——登入頁不驗帳密、`DemoAuthStorage` 僅存布林狀態、後端不知情。故 Eco-Agent 綁定步驟「App 送已驗證身份」之前提尚不成立，須先補 App 端後端認證（`EMPLOYEE.password_hash`、`POST /api/auth/login` 簽發雙 token、`get_current_employee` dependency、App 端改存真 token 於 secure storage）。列 P1 前置工作。
+- **[A2] 純前端登入為隱藏依賴，後端認證列 P1（承 [D5]）**：原以為 App「已有完整登入身份系統」屬事實誤述——登入頁不驗帳密、`DemoAuthStorage` 僅存布林狀態、後端不知情。故 Eco-Agent 綁定步驟「App 送已驗證身份」之前提尚不成立，須先補 App 端後端認證（`EMPLOYEE.password_hash`、`POST /api/auth/login` 簽發雙 token、`get_current_employee` dependency、App 端改存真 token 於 secure storage）。列 P1 前置工作。**（v33 註）**：此前置工作已完成（後端 B1–B6、App A1–A5，見 8.4「現況」），Eco-Agent 綁定「App 送已驗證身份」的前提已成立。
 - **[A3] `employee_id` 由憑證解出為全系統原則**：四大模組（差旅／廢棄物 session／電梯／Eco-Agent）payload 皆含 `employee_id`，若由 client 於 body 指定即等同任何人可把碳排寫到任何人名下；歸戶又直接連動 EXP／碳幣與 Shared Savings，可偽造即誘因失效，不可用「專題規模小」折抵。此原則對 App 各端點同樣適用（body 只帶業務參數、身份只從 header 憑證來）。**（v31 註）**：電梯停用、歸戶改選擇性後原則不變——凡歸戶，`employee_id` 仍只能由憑證解出；未歸戶事件則根本不帶 `employee_id`。
 - **[A4] App 端呈現對齊兩本帳（v31，承 2.1）**：員工端只呈現本人歸戶事件與獎勵（激勵帳），個人排名依參與而非碳排；部門排行與企業端依盤查帳（含未歸戶）。掃垃圾桶 QR 改為選擇性、以回饋作誘因。
 
@@ -1205,3 +1206,4 @@ Eco-Agent 為無人值守背景程式，身份綁定採「**一次綁定、長�
 | 2026-11-04 | v30 | **4.2 納入組員（負責 4.2）智慧垃圾桶 Demo 實作資訊**（來源：組員文件《Eco-Sensing｜目前智慧垃圾桶完整使用流程與技術》2026-11-03；repos `UIE47061/trash_can`（main）、`GuavaCode233/eco_sensing_app`（u1））。(一)**4.2 規格段**：硬體更正為樹莓派 5＋IMX219＋HX711＋Servo＋WS2812；Edge AI 補 4 類（`metal_can`／`paper`／`plastic_bottle`／`other`）、`imgsz=224`、CPU、top-1、影像上半部；新增任務狀態表（`waiting`→…→`completed`／`failed`）、樹莓派單筆流程、**實作版 payload 與端點**（`PATCH /trash/{id}/status`、`POST /trash/{id}/raw-data`，body 含 `raw_weight`、`image_url=null`、`ai_raw_result`、`sensor_data`）、本機 SQLite 狀態與重試（3 次、約 2 秒、失敗約 30 秒補報）。(二)**新增「實作現況與缺口」表**，逐項對照設計：QR 模擬、無 bin_id、無「投入完畢」／互斥鎖／LLM Fallback、`raw_weight` 非公克、無裝置身份 Header。(三)**[D3] 補 4 類實作資訊；[D4] 四項待設計項補進度；新增 [D5]**——任務派發與狀態回報採 Supabase `trash_sessions` 匯流排，樹莓派完全未用 MQTT。(四)**連帶註記**：現況快照廢棄物／Controller 兩列、第 3 節 MQTT 小節、5.1 架構分工原則（寫入經 FastAPI、讀取／訂閱直連）、5.2 樹莓派配置下發、8.3 App1.4。(五)**第 7 節**：4.2 項目改寫——類別數已決議為 4；新增 `[待對齊]`（Demo 與 A＋C＋D＋G 落差、資料表 `WASTE_*` vs `TRASH_*` 兩套並存）、`[待實作]`（HX711 校正、後端換算）、`[待決議]`（Supabase 直連例外、配置下發）；裝置認證與重送／冪等補現況。**⚠️ 未經檢視**：FastAPI 後端程式（`calculating`／`completed`、冪等、歸戶均未驗證）；組員文件為 Demo 說明、非端到端實測。**未納入**：LED 規則、systemd、GPIO 接線細節（見組員文件）。(六)**Demo 定位與收斂路徑**：明訂 Demo 為**暫時性解決方案（競賽展示、部分功能測試用）**，並於 4.2 新增「收斂路徑」表（11 項落差皆可在 Demo 架構上補開發／調整、無須重做，附前置條件）；快照、[D5]、第 7 節、8.3 同步註記。**ERD**：未動（0915 版已同時含 `WASTE_*` 與 `BINS`／`TRASH_SESSIONS`／`TRASH_RAW_DATA`，收斂列待對齊）。 |
 | 2026-11-25 | v31 | **歸戶改為選擇性、盤查帳／激勵帳全系統分離；4.2 新增一般通道；4.3 電梯停用**。動機：比賽後團隊決定減輕員工使用負擔，使用目的由「蒐集詳細數據並歸戶到每位員工」改為「僅保留員工碳排激勵帳，員工可選擇是否歸戶、歸戶者獲回饋，企業仍可透過模組感測取得總碳排」。(一)**新增 2.1 歸戶原則**：盤查帳以公司為主體收全部事件、激勵帳以員工為主體只收歸戶事件，歸戶＝加註而非搬移；資料層採**同表方案**（各事件表 `company_id` 必填快照、可不歸戶者 `employee_id` 選填＋`channel`（`attributed`／`general`）＋CHECK），否決另開未歸戶表（[D1]）；未歸戶事件依硬體所屬部門計入部門；**獎勵綁「參與感測與歸戶」而非碳排量**，參與率列為公司減碳成效評估依據之一（[D2]）；新增 `REWARD_TRANSACTION` 激勵流水（唯一鍵防重複發獎）。(二)**4.2 [D6] 一般通道**：不掃碼者由樹莓派低功耗待機、重量變化自動偵測投入，喚醒窗口固定時長逾時；窗口內**每件各自一筆 session**；樹莓派本地產生 UUID、新增一般事件端點、後端 UUID 冪等、持續自動重送；歸戶通道優先。連帶：歸戶 session 正式收斂為**一次投入**（取消「投入完畢」與多次累計）、方案 C 改為「歸戶模式鎖」並以燈色顯示；一般通道成為公司廢棄物帳主要來源，HX711 公克校正／4 類準確率／4 類係數優先序上調；新增待定參數 `generalWakeWindow`／`generalMinWeight`／重新歸零週期（5.2）。(三)**4.3 [D6] 電梯停用**：公司盤查帳零損失（[D4] 原即以電表總量計），移除 `ELEVATOR_TRIP`、電梯係數、App NFC、i 減碳電梯任務、企業端 NFC 標籤；章節保留標停用。(四)**Eco-Agent 不動**：`DIGITAL_USAGE` 僅加 `company_id`、`employee_id` 維持必填（避 partial index NULL 陷阱）。(五)**差旅（第 3 點）待討論**：`TRAVEL_RECORD` 先加 `company_id`，是否選擇性歸戶列第 7 節。更新：現況快照（新增歸戶原則列、廢棄物／電梯列）、§1 名詞、§2 表、§3、4.1／4.4 註記、4.2 規格（雙通道表、狀態表、一般事件上傳、收斂路徑三列）、4.5 註、5.1 查詢分流、5.2 配置表、第 7 節（電梯五項改停用、廢棄物項改寫、新增 2.1 相關五項）、第 8 章（i 減碳、排行榜、IoT、企業端 KPI／感測器管理、8.3 圖例 ⛔ 與 App1.3／1.8、[A3] 註、新增 [A4]）。**ERD 1125**：`TRASH_SESSIONS`＋`company_id`／`department_id`／`channel`、`BINS`＋`company_id`／`department_id`、`TRAVEL_RECORD`／`DIGITAL_USAGE`＋`company_id`、新增 `REWARD_TRANSACTION`、移除 `ELEVATOR_TRIP`、補 `EMPLOYEE`／`COMPANY`／`DEPARTMENT` 對 `TRASH_SESSIONS` 等關係；`WASTE_*` 未動（收斂仍待對齊）。 |
 | 2026-11-25 | v32 | **4.1 商務差旅與公司報帳流程結合（新增 4.1 [D3]），整合組員 Chun 決賽簡報 v0 的 Microsoft 服務流程**。團隊最終設計四點：(1) 差旅碳排模組與公司報帳手續結合；(2) 現階段不論報帳程序或負責人，員工在手續中加一步「掃描單據」，以 Outlook 為輔提醒報帳；(3) 未來直接串接公司報帳系統，自動完成碳排計算與歸戶；(4) 碳排一律由碳排運算引擎計算，報帳流程提供活動數據（起訖、日期、工具、金額），系統查里程 × 係數；Outlook 給不出碳排，角色是提醒與核對、不是資料來源。**連帶定案**：差旅一律歸戶、不適用 2.1 一般通道（報帳本即具名；`employee_id` 維持必填）。**自簡報整合**：擷取改 Azure AI Document Intelligence（高鐵票自訂擷取模型、收據截圖 Read），Tesseract 降為備援、移除 OpenCV 前處理；新增 9 步流程表（行事曆偵測→提醒→拍照→擷取→解析→里程→稽核→行事曆核對→入帳）；行事曆核對（`matched` 自動入帳／`mismatched` 轉人工覆核／`no_event` 照常入帳並標記——後者為 v32 草擬待確認）；高鐵里程改自建站間里程表（TDX 未提供）；高鐵係數改 0.029 kgCO₂e/人公里（待查證）；隱私範圍（行事曆只讀時間、地點、是否線上、出席者網域）。新增重複單據防呆、未來報帳系統串接（`entry_source` 新值、`receipt_id`＝報帳單號）。沿用不變：稽核清單、`preview` 試算、碳足跡唯讀／里程條件式可編輯、三態 `entry_source`、fallback 鏈（改為 Document Intelligence → Tesseract → 全手動）。更新：現況快照差旅列、2.1 適用表、4.1 標題／依賴／規格／決策記錄、技術堆疊三列、第 7 節（差旅項改已決議並新增九個子項）、8.1 掃描。**ERD**：`TRAVEL_RECORD` 新增 `calendar_check`（`matched`／`mismatched`／`no_event`）；`status` 補 `pending_review` 語意。**同日補充**：「會議取代出差＝避免排放」團隊決議保留——存獨立表 `AVOIDED_EMISSION`（不寫 `TRAVEL_RECORD`，確保盤查帳加總不會納入推估值）、只進激勵帳、回饋為固定額度並設上限以防刷；2.1 補「避免排放不進盤查帳」規則；ERD 新增 `AVOIDED_EMISSION`。**待確認**：`no_event` 規則。。**同日補充（二）**：行事曆 `no_event` 採草擬方案（照常入帳並標記）；**垃圾桶歸戶由 QR 改 NFC 感應**（4.2 [D7]，`app_links` 保留、沿用原電梯 NFC 流程）；歸戶 session 模式（一次投入 vs 時間窗多件）列待決議。。**同日補充（三）**：歸戶 session **正式版採時間窗**（每次投入後重新計時 30 秒、設總長上限），試行前半段沿用一次投入、後半段 A／B 比較（4.2 [D8]，取代 [D6] 的一次投入）；每件結果移至 `TRASH_RAW_DATA`（ERD）、新增 `attributedWindow`／`attributedWindowMax`；試行 A／B 組重訂。**廢棄物範疇更正為 Scope 3 Cat. 5**（第 2 節）。。**同日補充（四）**：數位能耗範疇更正——電腦＝Scope 2（電費已含，個人分攤只進激勵帳、盤查帳不重複計入）、印表機與雲端儲存＝Scope 3 Cat. 1（原 Scope 3 Cat. 8），依組員簡報附錄 A5。 |
+| 2026-11-27 | v33 | **第 8 章依 `main` 分支程式碼重新盤點 App 實作狀態（不改任何設計定案）**。(一)**身份認證更正為已落地**：原文多處「純前端登入、不驗帳密、後端不知情」已過時——依《App 驗證機制開發參考》§7.1，後端 B1–B6、App A1–A5 已完成，A6（body 不帶 `employee_id`）待各功能串接時落實。更新：現況快照「App 身份認證」「開發階段」兩列、§6 第四步改 🟡、8 章技術現況、8.1 登入、8.3 App1.0、8.4「現況」、[A2] 註。(二)**8.3 員工端逐列盤點**：App1.2 補「今日待辦」⚪；App1.3 註明電梯任務仍在；App1.4 列出收據確認對話框與 4.1 [D2](6) 的三項落差（里程一律可編輯、碳足跡不可為 `null`、送出仍帶碳排／EXP 且無 `entry_source`），並**更正垃圾桶串接只在 `u1` 分支、未併入 `main`**；App1.5 補個人排名依參與 ⚪；App1.6 註明分享／下載僅有提示；App1.8 改 ⛔⚪，註明電梯 NFC 程式碼尚未下線、deep link 骨架改給垃圾桶 NFC 沿用；**新增 App1.9 會議取代出差 ⚪**。(三)8.3 末註明狀態以 `main` 為準。**未動**：§4／§5 規格與決策記錄、第 7 節、企業端 8.2／App2.x、ERD。 |
